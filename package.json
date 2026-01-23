@@ -1,0 +1,161 @@
+{
+  "name": "cursor-usage-stats",
+  "displayName": "Cursor Usage Stats",
+  "description": "Monitor Cursor's included request usage and on-demand spending directly in the status bar with configurable threshold alerts.",
+  "version": "1.0.0",
+  "license": "MIT",
+  "author": "Numan <ahmetnuman95@hotmail.com>",
+  "publisher": "numanaral",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/numanaral/cursor-usage-stats"
+  },
+  "bugs": {
+    "url": "https://github.com/numanaral/cursor-usage-stats/issues"
+  },
+  "homepage": "https://github.com/numanaral/cursor-usage-stats#readme",
+  "icon": "assets/logo.png",
+  "keywords": [
+    "cursor",
+    "usage",
+    "stats",
+    "monitoring",
+    "billing",
+    "on-demand"
+  ],
+  "engines": {
+    "vscode": "^1.105.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./dist/extension.js",
+  "scripts": {
+    "build": "esbuild src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node --sourcemap",
+    "watch": "yarn build --watch",
+    "package": "yarn build && vsce package",
+    "typecheck": "tsc --noEmit",
+    "eslint": "eslint .",
+    "eslint:fix": "eslint . --fix",
+    "prettier": "prettier --check .",
+    "prettier:fix": "prettier --write .",
+    "lint": "yarn typecheck && yarn eslint && yarn prettier",
+    "lint:fix": "yarn typecheck && yarn eslint:fix && yarn prettier:fix",
+    "pretest": "yarn build && yarn mock generate && tsc -p . --outDir out",
+    "test": "vscode-test",
+    "mock": "tsx scripts/mocker.ts"
+  },
+  "contributes": {
+    "configuration": {
+      "title": "Cursor Usage Stats",
+      "properties": {
+        "cursorUsageStats.notifyOnStartup": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show a notification with current usage when the extension loads."
+        },
+        "cursorUsageStats.pollIntervalSeconds": {
+          "type": "number",
+          "default": 60,
+          "description": "How often to fetch usage data in seconds."
+        },
+        "cursorUsageStats.statusBar.displayMode": {
+          "type": "string",
+          "enum": [
+            "both",
+            "requests",
+            "onDemand"
+          ],
+          "default": "both",
+          "description": "What to display in the status bar: 'both' shows requests and on-demand, 'requests' shows only request count, 'onDemand' shows only spending."
+        },
+        "cursorUsageStats.statusBar.primaryMetric": {
+          "type": "string",
+          "enum": [
+            "includedRequest",
+            "onDemand"
+          ],
+          "default": "onDemand",
+          "description": "Which metric determines the status bar color and notification severity."
+        },
+        "cursorUsageStats.api.includedRequestModelKey": {
+          "type": "string",
+          "default": "gpt-4",
+          "description": "The model key in Cursor's /api/usage response for included requests. Falls back to auto-detecting a key with numRequestsTotal and maxRequestUsage if not found."
+        },
+        "cursorUsageStats.alerts.includedRequestUsage.warningPercentageThresholds": {
+          "type": "array",
+          "default": [
+            50,
+            60,
+            70
+          ],
+          "description": "Usage percentages that trigger warning alerts for included requests. Use an empty array to disable."
+        },
+        "cursorUsageStats.alerts.includedRequestUsage.criticalPercentageThresholds": {
+          "type": "array",
+          "default": [
+            80,
+            90,
+            95
+          ],
+          "description": "Usage percentages that trigger critical alerts for included requests. Use an empty array to disable."
+        },
+        "cursorUsageStats.alerts.onDemandUsage.warningPercentageThresholds": {
+          "type": "array",
+          "default": [
+            50,
+            60,
+            70
+          ],
+          "description": "Usage percentages that trigger warning alerts for on-demand spending. Use an empty array to disable."
+        },
+        "cursorUsageStats.alerts.onDemandUsage.criticalPercentageThresholds": {
+          "type": "array",
+          "default": [
+            80,
+            90,
+            95
+          ],
+          "description": "Usage percentages that trigger critical alerts for on-demand spending. Use an empty array to disable."
+        }
+      }
+    },
+    "commands": [
+      {
+        "command": "cursorUsageStats.refresh",
+        "title": "Cursor Usage Stats: Refresh",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "cursorUsageStats.showDetails",
+        "title": "Cursor Usage Stats: Show Details"
+      }
+    ]
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.2",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^25.0.10",
+    "@types/vscode": "^1.105.0",
+    "@vscode/test-cli": "^0.0.12",
+    "@vscode/test-electron": "^2.5.2",
+    "@vscode/vsce": "^3.7.1",
+    "esbuild": "^0.27.2",
+    "eslint": "^9.39.2",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-import-resolver-typescript": "^4.4.4",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-prettier": "^5.5.5",
+    "glob": "^13.0.0",
+    "globals": "^17.1.0",
+    "mocha": "^11.7.5",
+    "prettier": "^3.8.1",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.53.1"
+  }
+}

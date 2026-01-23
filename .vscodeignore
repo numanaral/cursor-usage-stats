@@ -1,0 +1,47 @@
+# Source files (we ship compiled dist/)
+src/**
+**/*.ts
+**/*.map
+
+# Build and test output (except dist/)
+out/
+coverage/
+.nyc_output/
+
+# Development configs
+tsconfig.json
+eslint.config.mjs
+.prettierrc
+.prettierignore
+.vscode-test.*
+
+# Development folders
+.vscode/**
+.vscode-test/**
+.cursor/**
+development/**
+testing/**
+scripts/**
+assets/**
+!assets/logo.png
+
+# Dependencies (vsce handles this, but explicit)
+node_modules/
+
+# Git
+.git/**
+.gitignore
+
+# Documentation (dev only)
+plan.md
+vsc-extension-quickstart.md
+*.md
+!README.md
+!CHANGELOG.md
+!LICENSE.md
+
+# Misc
+*.vsix
+*.log
+.DS_Store
+.env*
