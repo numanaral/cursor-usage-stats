@@ -47,9 +47,10 @@
     "prettier:fix": "prettier --write .",
     "lint": "yarn typecheck && yarn eslint && yarn prettier",
     "lint:fix": "yarn typecheck && yarn eslint:fix && yarn prettier:fix",
-    "pretest": "yarn build && yarn mock generate && tsc -p . --outDir out",
+    "mock": "tsx scripts/mocker.ts",
+    "pretest": "rm -rf out && yarn build && yarn mock generate && tsc -p . --outDir out",
     "test": "vscode-test",
-    "mock": "tsx scripts/mocker.ts"
+    "test:slow": "TEST_UI_PAUSE_MS=1000 vscode-test"
   },
   "contributes": {
     "configuration": {

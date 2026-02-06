@@ -19,6 +19,17 @@
       }
     },
     {
+      "name": "Run Extension (Missing sqlite3)",
+      "type": "extensionHost",
+      "request": "launch",
+      "args": ["--extensionDevelopmentPath=${workspaceFolder}"],
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+      "env": {
+        "USE_MOCKED_API_DATA": "true",
+        "PATH": "/nonexistent"
+      }
+    },
+    {
       "name": "Extension Tests",
       "type": "extensionHost",
       "request": "launch",
