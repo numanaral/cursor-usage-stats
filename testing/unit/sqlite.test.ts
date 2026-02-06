@@ -1,9 +1,12 @@
 import * as assert from "assert";
 import * as os from "os";
 
-import { getSqliteInstallCommand, isSqliteAvailable } from "../../src/sqlite";
+import {
+  getSqliteInstallCommand,
+  isSqliteAvailable,
+} from "../../src/sqlite/utils";
 
-suite("Sqlite", () => {
+suite("Sqlite Utils", () => {
   suite("isSqliteAvailable", () => {
     test("returns a boolean", () => {
       const result = isSqliteAvailable();

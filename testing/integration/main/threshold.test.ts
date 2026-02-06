@@ -6,20 +6,20 @@ import {
   getTriggeredOnDemandThresholds,
   resetTriggeredThresholds,
   setNotificationTracking,
-} from "../../src/alerts";
+} from "../../../src/alerts";
 import {
   createStatusBarItem,
   disposeStatusBar,
   getStatusBarItem,
   updateStatusBar,
-} from "../../src/statusBar";
+} from "../../../src/statusBar";
 import {
   type CursorCombinedUsage,
   type CursorUsageApiResponse,
   type CursorUsageSummaryApiResponse,
   type ExtensionConfig,
-} from "../../src/types";
-import { sleep, UI_PAUSE_MS } from "../utils";
+} from "../../../src/types";
+import { sleep, UI_PAUSE_MS } from "../../utils";
 
 import type * as vscode from "vscode";
 

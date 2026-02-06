@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import * as assert from "assert";
 
-import { EXTENSION_DEFAULT_CONFIG } from "../../src/constants";
+import { EXTENSION_DEFAULT_CONFIG } from "../../../src/constants";
 
 suite("Extension", () => {
   suite("EXTENSION_DEFAULT_CONFIG", () => {

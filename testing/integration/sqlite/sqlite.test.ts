@@ -14,8 +14,8 @@ import {
   getSqliteInstallCommand,
   isSqliteAvailable,
   type SqlitePromptSignal,
-} from "../../src/sqlite";
-import { sleep, UI_PAUSE_MS } from "../utils";
+} from "../../../src/sqlite";
+import { sleep, UI_PAUSE_MS } from "../../utils";
 
 /**
  * Polls globalThis for the prompt signal set by the bundled extension.
@@ -231,8 +231,11 @@ suite("Sqlite UI - Post-install recovery", () => {
     // The bundle reads from dist/, but tsc output uses out/src/.
     const fs = await import("fs");
     const path = await import("path");
-    const src = path.join(__dirname, "../../../dist/mock-api-responses.json");
-    const dest = path.join(__dirname, "../../src/mock-api-responses.json");
+    const src = path.join(
+      __dirname,
+      "../../../../dist/mock-api-responses.json",
+    );
+    const dest = path.join(__dirname, "../../../src/mock-api-responses.json");
 
     if (fs.existsSync(src)) {
       fs.copyFileSync(src, dest);
@@ -242,7 +245,7 @@ suite("Sqlite UI - Post-install recovery", () => {
     // This is a fresh module instance separate from the bundle,
     // so calling activate() here runs the full activation path
     // (status bar, commands, polling) with PATH now restored.
-    const { activate } = await import("../../src/extension");
+    const { activate } = await import("../../../src/extension");
 
     const mockContext = {
       subscriptions: disposables,

@@ -30,14 +30,14 @@
       }
     },
     {
-      "name": "Extension Tests",
+      "name": "Integration Tests",
       "type": "extensionHost",
       "request": "launch",
       "runtimeExecutable": "${execPath}",
       "args": [
         "--disable-extensions",
         "--extensionDevelopmentPath=${workspaceFolder}",
-        "--extensionTestsPath=${workspaceFolder}/out/testing/suite/index"
+        "--extensionTestsPath=${workspaceFolder}/out/testing/integration/main/index"
       ],
       "outFiles": ["${workspaceFolder}/out/**/*.js"],
       "env": {

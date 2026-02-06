@@ -5,7 +5,7 @@ import {
   getTriggeredOnDemandThresholds,
   markExceededThresholdsAsTriggered,
   resetTriggeredThresholds,
-} from "../../src/alerts";
+} from "../../src/alerts/utils";
 import {
   type CursorCombinedUsage,
   type ExtensionConfig,

@@ -1,22 +1,20 @@
 import * as vscode from "vscode";
 
-import { getModelUsage } from "./api";
-import { StatusBarPrimaryMetric, ThresholdSeverity } from "./constants";
-import { getIncludedRequestSeverity, getOnDemandSeverity } from "./statusBar";
+import { getModelUsage } from "../api";
+import { StatusBarPrimaryMetric, ThresholdSeverity } from "../constants";
+import { getIncludedRequestSeverity, getOnDemandSeverity } from "../statusBar";
 import {
   type ExtensionAlertThresholds,
   type CursorCombinedUsage,
   type ExtensionConfig,
   type ExtensionThresholdSeverity,
   type ExtensionNotificationRecord,
-} from "./types";
-import { formatCents, formatResetDateFull } from "./utils";
-
-/** Tracks which thresholds have already triggered alerts for included requests. */
-const triggeredIncludedRequestThresholds = new Set<number>();
-
-/** Tracks which thresholds have already triggered alerts for on-demand usage. */
-const triggeredOnDemandThresholds = new Set<number>();
+} from "../types";
+import { formatCents, formatResetDateFull } from "../utils";
+import {
+  getTriggeredIncludedRequestThresholds,
+  getTriggeredOnDemandThresholds,
+} from "./utils";
 
 /** Tracks notifications shown. Used only for testing. */
 let notificationHistory: ExtensionNotificationRecord[] | null = null;
@@ -144,7 +142,7 @@ export const checkIncludedRequestThresholds = (
   checkThresholds({
     currentPercent: (modelUsage.numRequests / modelUsage.maxRequestUsage) * 100,
     thresholds: config.alerts.includedRequestUsage,
-    triggeredSet: triggeredIncludedRequestThresholds,
+    triggeredSet: getTriggeredIncludedRequestThresholds(),
     formatMessage: (actualPercent, thresholdValue) => {
       return `Requests: ${modelUsage.numRequests}/${modelUsage.maxRequestUsage} (${actualPercent}%) - Passed ${thresholdValue}% threshold`;
     },
@@ -169,7 +167,7 @@ export const checkOnDemandThresholds = (
   checkThresholds({
     currentPercent: (onDemand.used / onDemand.limit) * 100,
     thresholds: config.alerts.onDemandUsage,
-    triggeredSet: triggeredOnDemandThresholds,
+    triggeredSet: getTriggeredOnDemandThresholds(),
     formatMessage: (actualPercent, thresholdValue) => {
       return `On-Demand: ${formatCents(onDemand.used)}/${formatCents(onDemand.limit)} (${actualPercent}%) - Passed ${thresholdValue}% threshold`;
     },
@@ -235,82 +233,6 @@ export const showUsageSummaryNotification = (
   showNotification(message, severity).then((selection) => {
     handleNotificationSelection(selection, onRefresh);
   });
-};
-
-/**
- * Marks exceeded thresholds as triggered for a given percentage and threshold config.
- */
-const markExceededThresholds = (
-  percent: number,
-  thresholds: ExtensionAlertThresholds,
-  triggeredSet: Set<number>,
-) => {
-  const allThresholds = [
-    ...thresholds.warningPercentageThresholds,
-    ...thresholds.criticalPercentageThresholds,
-  ];
-
-  for (const threshold of allThresholds) {
-    if (percent >= threshold) {
-      triggeredSet.add(threshold);
-    }
-  }
-};
-
-/**
- * Marks all currently-exceeded thresholds as triggered without showing alerts.
- * Call this on first load to avoid spamming notifications.
- */
-export const markExceededThresholdsAsTriggered = (
-  data: CursorCombinedUsage,
-  config: ExtensionConfig,
-) => {
-  const modelUsage = getModelUsage(
-    data.usage,
-    config.api.includedRequestModelKey,
-  );
-
-  if (modelUsage && modelUsage.maxRequestUsage !== null) {
-    const percent = (modelUsage.numRequests / modelUsage.maxRequestUsage) * 100;
-    markExceededThresholds(
-      percent,
-      config.alerts.includedRequestUsage,
-      triggeredIncludedRequestThresholds,
-    );
-  }
-
-  const onDemand = data.summary.individualUsage.onDemand;
-
-  if (onDemand.enabled && onDemand.limit > 0) {
-    const percent = (onDemand.used / onDemand.limit) * 100;
-    markExceededThresholds(
-      percent,
-      config.alerts.onDemandUsage,
-      triggeredOnDemandThresholds,
-    );
-  }
-};
-
-/**
- * Resets triggered thresholds (call on new billing cycle).
- */
-export const resetTriggeredThresholds = () => {
-  triggeredIncludedRequestThresholds.clear();
-  triggeredOnDemandThresholds.clear();
-};
-
-/**
- * Gets the triggered included request thresholds (for testing).
- */
-export const getTriggeredIncludedRequestThresholds = () => {
-  return triggeredIncludedRequestThresholds;
-};
-
-/**
- * Gets the triggered on-demand thresholds (for testing).
- */
-export const getTriggeredOnDemandThresholds = () => {
-  return triggeredOnDemandThresholds;
 };
 
 // #region Test helpers
