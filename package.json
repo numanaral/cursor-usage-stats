@@ -2,7 +2,7 @@
   "name": "cursor-usage-stats",
   "displayName": "Cursor Usage Stats",
   "description": "Monitor Cursor's included request usage and on-demand spending directly in the status bar with configurable threshold alerts.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "license": "MIT",
   "author": "Numan <ahmetnuman95@hotmail.com>",
   "publisher": "numanaral",
@@ -50,7 +50,8 @@
     "mock": "tsx scripts/mocker.ts",
     "pretest": "rm -rf out && yarn build && yarn mock generate && tsc -p . --outDir out",
     "test": "vscode-test",
-    "test:slow": "TEST_UI_PAUSE_MS=1000 vscode-test"
+    "test:slow": "TEST_UI_PAUSE_MS=1000 vscode-test",
+    "publish": "source .env && npx ovsx publish -p $OVSX_PAT --yarn"
   },
   "contributes": {
     "configuration": {

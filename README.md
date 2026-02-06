@@ -39,13 +39,13 @@ Search for "Cursor Usage Stats" in Cursor's extension panel.
 
 All settings are under `cursorUsageStats.*` in your settings.
 
-| Setting                                | Default        | Description                                                                 |
-| -------------------------------------- | -------------- | --------------------------------------------------------------------------- |
-| `notifyOnStartup`                      | `true`         | Show usage notification when extension loads                                |
-| `pollIntervalSeconds`                  | `60`           | How often to fetch usage data (in seconds)                                  |
-| `statusBar.displayMode`                | `"both"`       | What to show: `"both"`, `"requests"`, or `"onDemand"`                       |
-| `statusBar.primaryMetric`              | `"onDemand"`   | Which metric controls status bar color: `"includedRequest"` or `"onDemand"` |
-| `api.includedRequestModelKey`          | `"gpt-4"`      | Model key for included requests (auto-detects if not found)                 |
+| Setting                                                    | Default        | Description                                                                 |
+| ---------------------------------------------------------- | -------------- | --------------------------------------------------------------------------- |
+| `notifyOnStartup`                                          | `true`         | Show usage notification when extension loads                                |
+| `pollIntervalSeconds`                                      | `60`           | How often to fetch usage data (in seconds)                                  |
+| `statusBar.displayMode`                                    | `"both"`       | What to show: `"both"`, `"requests"`, or `"onDemand"`                       |
+| `statusBar.primaryMetric`                                  | `"onDemand"`   | Which metric controls status bar color: `"includedRequest"` or `"onDemand"` |
+| `api.includedRequestModelKey`                              | `"gpt-4"`      | Model key for included requests (auto-detects if not found)                 |
 | `alerts.includedRequestUsage.warningPercentageThresholds`  | `[50, 60, 70]` | Warning thresholds (%) for included requests                                |
 | `alerts.includedRequestUsage.criticalPercentageThresholds` | `[80, 90, 95]` | Critical thresholds (%) for included requests                               |
 | `alerts.onDemandUsage.warningPercentageThresholds`         | `[50, 60, 70]` | Warning thresholds (%) for on-demand spending                               |
@@ -115,7 +115,8 @@ Press `F5` in Cursor to launch the Extension Development Host.
 ### Testing
 
 ```bash
-yarn test           # Run all tests
+yarn test           # Run all tests (fast, no UI pauses)
+yarn test:slow      # Run tests with 1s pauses between UI steps
 yarn lint           # Check for linting errors
 ```
 
@@ -172,13 +173,7 @@ Cursor uses the [Open VSX Registry](https://open-vsx.org) for extensions. See th
 2. **Publish to Open VSX:**
 
    ```bash
-   source .env && npx ovsx publish cursor-usage-stats-*.vsix -p $OVSX_PAT --yarn
-   ```
-
-   Or build and publish in one step:
-
-   ```bash
-   source .env && npx ovsx publish -p $OVSX_PAT --yarn
+   yarn publish        # Builds, packages, and publishes in one step
    ```
 
 3. **Wait for processing** — The extension may take some time to be available in the marketplace.
