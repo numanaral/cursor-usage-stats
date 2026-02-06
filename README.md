@@ -6,9 +6,7 @@ Monitor your Cursor IDE usage directly in the status bar. Track included request
 
 > **Note:** This extension is built for [Cursor](https://cursor.com), not VS Code.
 
-## Demo
-
-![Cursor Usage Stats Demo](https://raw.githubusercontent.com/numanaral/cursor-usage-stats/main/assets/cursor-usage-stats-demo.gif)
+![Notification Stacked](https://raw.githubusercontent.com/numanaral/cursor-usage-stats/main/assets/notification-stacked.png)
 
 ## Features
 
@@ -19,6 +17,31 @@ Monitor your Cursor IDE usage directly in the status bar. Track included request
 - **Color-coded Indicators** — Status bar changes color as usage increases:
   - Normal (no color) → Warning (yellow) → Critical (red)
 - **Detailed Breakdown** — Click the status bar for a full usage summary
+- **sqlite3 Install Prompt** — Guides you through installing the required dependency if missing
+
+## Screenshots
+
+### Status Bar
+
+| Normal | Warning | Critical |
+|---|---|---|
+| ![Normal](https://raw.githubusercontent.com/numanaral/cursor-usage-stats/main/assets/toolbar-regular.png) | ![Warning](https://raw.githubusercontent.com/numanaral/cursor-usage-stats/main/assets/toolbar-warning.png) | ![Critical](https://raw.githubusercontent.com/numanaral/cursor-usage-stats/main/assets/toolbar-critical.png) |
+
+### Notifications
+
+| Regular | Warning | Critical |
+|---|---|---|
+| ![Regular](https://raw.githubusercontent.com/numanaral/cursor-usage-stats/main/assets/notification-regular.png) | ![Warning](https://raw.githubusercontent.com/numanaral/cursor-usage-stats/main/assets/notification-warning.png) | ![Critical](https://raw.githubusercontent.com/numanaral/cursor-usage-stats/main/assets/notification-critical.png) |
+
+### sqlite3 Install Prompt
+
+| Missing Dependency | Reload After Install |
+|---|---|
+| ![sqlite3 Prompter](https://raw.githubusercontent.com/numanaral/cursor-usage-stats/main/assets/notification-sqlite-prompter.png) | ![Reload Window](https://raw.githubusercontent.com/numanaral/cursor-usage-stats/main/assets/notification-sqlite-reload-window.png) |
+
+### Full Feature Demo
+
+![Cursor Usage Stats Demo](https://raw.githubusercontent.com/numanaral/cursor-usage-stats/main/assets/cursor-usage-stats-demo.gif)
 
 ## Installation
 
