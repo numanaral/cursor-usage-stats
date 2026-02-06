@@ -19,6 +19,7 @@ import {
   type CursorUsageSummaryApiResponse,
   type ExtensionConfig,
 } from "../../src/types";
+import { sleep, UI_PAUSE_MS } from "../utils";
 
 import type * as vscode from "vscode";
 
@@ -29,8 +30,6 @@ import type * as vscode from "vscode";
  * and verifies that thresholds, status bar text, and colors update correctly.
  */
 suite("Integration - Threshold Alerts & Status Bar", () => {
-  const INTERVAL_MS = 100; // Use 100ms for faster tests.
-
   const createMockConfig = (): ExtensionConfig => {
     return {
       notifyOnStartup: true,
@@ -117,11 +116,6 @@ suite("Integration - Threshold Alerts & Status Bar", () => {
     };
   };
 
-  // Helper to wait.
-  const delay = (ms: number) => {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-  };
-
   // Note: Tests use their own module instance, separate from the bundled extension.
   // We create/dispose our own status bar item for testing.
 
@@ -138,7 +132,7 @@ suite("Integration - Threshold Alerts & Status Bar", () => {
   });
 
   suite("Status Bar Text Updates", () => {
-    test("displays correct text at different usage levels", () => {
+    test("displays correct text at different usage levels", async () => {
       const config = createMockConfig();
       const statusBar = getStatusBarItem();
       assert.ok(statusBar, "Status bar should be created");
@@ -151,6 +145,8 @@ suite("Integration - Threshold Alerts & Status Bar", () => {
         `Expected $0.00/$150.00, got: ${statusBar.text}`,
       );
 
+      await sleep(UI_PAUSE_MS);
+
       // $75 on-demand.
       data = createCombinedUsage(7500);
       updateStatusBar(data, config);
@@ -159,6 +155,8 @@ suite("Integration - Threshold Alerts & Status Bar", () => {
         `Expected $75.00/$150.00, got: ${statusBar.text}`,
       );
 
+      await sleep(UI_PAUSE_MS);
+
       // $150 on-demand (max).
       data = createCombinedUsage(15000);
       updateStatusBar(data, config);
@@ -166,9 +164,11 @@ suite("Integration - Threshold Alerts & Status Bar", () => {
         statusBar.text.includes("$150.00/$150.00"),
         `Expected $150.00/$150.00, got: ${statusBar.text}`,
       );
+
+      await sleep(UI_PAUSE_MS);
     });
 
-    test("displays request count alongside on-demand", () => {
+    test("displays request count alongside on-demand", async () => {
       const config = createMockConfig();
       const statusBar = getStatusBarItem();
       assert.ok(statusBar, "Status bar should be created");
@@ -185,11 +185,13 @@ suite("Integration - Threshold Alerts & Status Bar", () => {
         statusBar.text.includes("$50.00/$150.00"),
         `Expected $50.00/$150.00, got: ${statusBar.text}`,
       );
+
+      await sleep(UI_PAUSE_MS);
     });
   });
 
   suite("Status Bar Color Changes", () => {
-    test("has no background color below warning threshold", () => {
+    test("has no background color below warning threshold", async () => {
       const config = createMockConfig();
       const statusBar = getStatusBarItem();
       assert.ok(statusBar, "Status bar should be created");
@@ -203,9 +205,11 @@ suite("Integration - Threshold Alerts & Status Bar", () => {
         undefined,
         "Background should be undefined for normal",
       );
+
+      await sleep(UI_PAUSE_MS);
     });
 
-    test("has warning background at 50%", () => {
+    test("has warning background at 50%", async () => {
       const config = createMockConfig();
       const statusBar = getStatusBarItem();
       assert.ok(statusBar, "Status bar should be created");
@@ -221,9 +225,11 @@ suite("Integration - Threshold Alerts & Status Bar", () => {
         "statusBarItem.warningBackground",
         "Should use warning background color",
       );
+
+      await sleep(UI_PAUSE_MS);
     });
 
-    test("has error background at 80%", () => {
+    test("has error background at 80%", async () => {
       const config = createMockConfig();
       const statusBar = getStatusBarItem();
       assert.ok(statusBar, "Status bar should be created");
@@ -239,6 +245,8 @@ suite("Integration - Threshold Alerts & Status Bar", () => {
         "statusBarItem.errorBackground",
         "Should use error background color",
       );
+
+      await sleep(UI_PAUSE_MS);
     });
 
     test("color transitions correctly as usage increases", async () => {
@@ -251,7 +259,7 @@ suite("Integration - Threshold Alerts & Status Bar", () => {
       updateStatusBar(data, config);
       assert.strictEqual(statusBar.backgroundColor, undefined, "Normal at 20%");
 
-      await delay(INTERVAL_MS);
+      await sleep(UI_PAUSE_MS);
 
       // Warning (50%).
       data = createCombinedUsage(7500);
@@ -263,7 +271,7 @@ suite("Integration - Threshold Alerts & Status Bar", () => {
         "Should use warning background",
       );
 
-      await delay(INTERVAL_MS);
+      await sleep(UI_PAUSE_MS);
 
       // Critical (80%).
       data = createCombinedUsage(12000);
@@ -278,7 +286,7 @@ suite("Integration - Threshold Alerts & Status Bar", () => {
   });
 
   suite("Notification Alerts", () => {
-    test("shows warning notification at 50% threshold", () => {
+    test("shows warning notification at 50% threshold", async () => {
       const config = createMockConfig();
       const onRefresh = () => {};
 
@@ -297,9 +305,11 @@ suite("Integration - Threshold Alerts & Status Bar", () => {
         history[0].message.includes("50%"),
         `Message should mention 50% threshold: ${history[0].message}`,
       );
+
+      await sleep(UI_PAUSE_MS);
     });
 
-    test("shows critical notification at 80% threshold", () => {
+    test("shows critical notification at 80% threshold", async () => {
       const config = createMockConfig();
       const onRefresh = () => {};
 
@@ -318,9 +328,11 @@ suite("Integration - Threshold Alerts & Status Bar", () => {
         history[0].message.includes("80%"),
         `Message should mention 80% threshold: ${history[0].message}`,
       );
+
+      await sleep(UI_PAUSE_MS);
     });
 
-    test("does not show notification below thresholds", () => {
+    test("does not show notification below thresholds", async () => {
       const config = createMockConfig();
       const onRefresh = () => {};
 
@@ -330,9 +342,11 @@ suite("Integration - Threshold Alerts & Status Bar", () => {
 
       const history = getNotificationHistory();
       assert.strictEqual(history.length, 0, "Should not show any notification");
+
+      await sleep(UI_PAUSE_MS);
     });
 
-    test("shows only one notification when jumping over multiple thresholds", () => {
+    test("shows only one notification when jumping over multiple thresholds", async () => {
       const config = createMockConfig();
       const onRefresh = () => {};
 
@@ -351,6 +365,8 @@ suite("Integration - Threshold Alerts & Status Bar", () => {
         "critical",
         "Should show highest severity (critical at 80%)",
       );
+
+      await sleep(UI_PAUSE_MS);
     });
 
     test("does not re-notify for already triggered threshold", async () => {
@@ -366,7 +382,7 @@ suite("Integration - Threshold Alerts & Status Bar", () => {
         "First notification shown",
       );
 
-      await delay(100);
+      await sleep(UI_PAUSE_MS);
 
       // Check again at same level - should not notify again.
       checkOnDemandThresholds(data, config, onRefresh);
@@ -429,7 +445,7 @@ suite("Integration - Threshold Alerts & Status Bar", () => {
           );
         }
 
-        await delay(100);
+        await sleep(UI_PAUSE_MS);
       }
     });
   });
@@ -449,7 +465,7 @@ suite("Integration - Threshold Alerts & Status Bar", () => {
         "No thresholds at 0%",
       );
 
-      await delay(INTERVAL_MS);
+      await sleep(UI_PAUSE_MS);
 
       // $75 -> 50% (first warning).
       data = createCombinedUsage(7500);
@@ -459,7 +475,7 @@ suite("Integration - Threshold Alerts & Status Bar", () => {
         "50% threshold triggered at $75",
       );
 
-      await delay(INTERVAL_MS);
+      await sleep(UI_PAUSE_MS);
 
       // $90 -> 60% (second warning).
       data = createCombinedUsage(9000);
@@ -469,7 +485,7 @@ suite("Integration - Threshold Alerts & Status Bar", () => {
         "60% threshold triggered at $90",
       );
 
-      await delay(INTERVAL_MS);
+      await sleep(UI_PAUSE_MS);
 
       // $105 -> 70% (third warning).
       data = createCombinedUsage(10500);
@@ -479,7 +495,7 @@ suite("Integration - Threshold Alerts & Status Bar", () => {
         "70% threshold triggered at $105",
       );
 
-      await delay(INTERVAL_MS);
+      await sleep(UI_PAUSE_MS);
 
       // $120 -> 80% (first critical).
       data = createCombinedUsage(12000);
@@ -489,7 +505,7 @@ suite("Integration - Threshold Alerts & Status Bar", () => {
         "80% threshold triggered at $120",
       );
 
-      await delay(INTERVAL_MS);
+      await sleep(UI_PAUSE_MS);
 
       // $135 -> 90% (second critical).
       data = createCombinedUsage(13500);
@@ -499,7 +515,7 @@ suite("Integration - Threshold Alerts & Status Bar", () => {
         "90% threshold triggered at $135",
       );
 
-      await delay(INTERVAL_MS);
+      await sleep(UI_PAUSE_MS);
 
       // $150 -> 100% (third critical).
       data = createCombinedUsage(15000);
@@ -523,7 +539,7 @@ suite("Integration - Threshold Alerts & Status Bar", () => {
       checkOnDemandThresholds(data, config, onRefresh);
       const triggeredAfterFirst = getTriggeredOnDemandThresholds().size;
 
-      await delay(INTERVAL_MS);
+      await sleep(UI_PAUSE_MS);
 
       // Same data again - should not trigger again.
       checkOnDemandThresholds(data, config, onRefresh);
@@ -680,7 +696,7 @@ suite("Integration - Threshold Alerts & Status Bar", () => {
 
         // Wait 1s between updates (like real demo).
         if (i < sequence.length - 1) {
-          await delay(1000);
+          await sleep(UI_PAUSE_MS);
         }
       }
     });
