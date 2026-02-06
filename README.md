@@ -23,20 +23,20 @@ Monitor your Cursor IDE usage directly in the status bar. Track included request
 
 ### Status Bar
 
-| Normal | Warning | Critical |
-|---|---|---|
+| Normal                                                                                                    | Warning                                                                                                    | Critical                                                                                                     |
+| --------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
 | ![Normal](https://raw.githubusercontent.com/numanaral/cursor-usage-stats/main/assets/toolbar-regular.png) | ![Warning](https://raw.githubusercontent.com/numanaral/cursor-usage-stats/main/assets/toolbar-warning.png) | ![Critical](https://raw.githubusercontent.com/numanaral/cursor-usage-stats/main/assets/toolbar-critical.png) |
 
 ### Notifications
 
-| Regular | Warning | Critical |
-|---|---|---|
+| Regular                                                                                                         | Warning                                                                                                         | Critical                                                                                                          |
+| --------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
 | ![Regular](https://raw.githubusercontent.com/numanaral/cursor-usage-stats/main/assets/notification-regular.png) | ![Warning](https://raw.githubusercontent.com/numanaral/cursor-usage-stats/main/assets/notification-warning.png) | ![Critical](https://raw.githubusercontent.com/numanaral/cursor-usage-stats/main/assets/notification-critical.png) |
 
 ### sqlite3 Install Prompt
 
-| Missing Dependency | Reload After Install |
-|---|---|
+| Missing Dependency                                                                                                               | Reload After Install                                                                                                               |
+| -------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
 | ![sqlite3 Prompter](https://raw.githubusercontent.com/numanaral/cursor-usage-stats/main/assets/notification-sqlite-prompter.png) | ![Reload Window](https://raw.githubusercontent.com/numanaral/cursor-usage-stats/main/assets/notification-sqlite-reload-window.png) |
 
 ### Full Feature Demo
@@ -187,18 +187,19 @@ Cursor uses the [Open VSX Registry](https://open-vsx.org) for extensions. See th
 
 ### Automated (via GitHub Actions)
 
-1. Bump the `version` in `package.json`.
-2. Push to `main` (or merge a PR).
-3. The [publish workflow](.github/workflows/publish.yml) detects the version change and automatically runs tests, publishes to Open VSX, creates a GitHub release, and attaches the `.vsix`.
+1. Run the release script:
+
+   ```bash
+   yarn release patch   # 1.0.1 → 1.0.2
+   yarn release minor   # 1.0.1 → 1.1.0
+   yarn release major   # 1.0.1 → 2.0.0
+   ```
+
+   This bumps the version, creates a release branch, commits, tags, pushes, and opens a PR.
+
+2. Merge the PR. The [publish workflow](.github/workflows/publish.yml) automatically runs tests, publishes to Open VSX, creates a GitHub release, and attaches the `.vsix`.
 
 > **Note:** Add your `OVSX_PAT` as a [repository secret](https://github.com/numanaral/cursor-usage-stats/settings/secrets/actions) for the workflow to publish.
-
-### Manual
-
-```bash
-yarn package        # Creates cursor-usage-stats-x.x.x.vsix
-yarn publish        # Builds, packages, and publishes to Open VSX
-```
 
 > **Note:** Extensions on Open VSX automatically appear in Cursor's marketplace.
 

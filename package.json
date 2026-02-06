@@ -50,11 +50,11 @@
     "lint:fix": "yarn typecheck && yarn eslint:fix && yarn prettier:fix",
     "mock": "tsx scripts/mocker.ts",
     "pretest": "rm -rf out && yarn build && yarn mock generate && tsc -p . --outDir out",
-    "test": "yarn test:unit && yarn test:integration",
     "test:unit": "mocha out/testing/unit/**/*.test.js --ui tdd --timeout 20000",
     "test:integration": "vscode-test",
+    "test": "yarn test:unit && yarn test:integration",
     "test:slow": "TEST_UI_PAUSE_MS=1000 yarn test:unit && TEST_UI_PAUSE_MS=1000 vscode-test",
-    "publish": "source .env && npx ovsx publish -p $OVSX_PAT --yarn"
+    "release": "tsx scripts/release.ts"
   },
   "contributes": {
     "configuration": {
