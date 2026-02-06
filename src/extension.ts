@@ -12,6 +12,7 @@ import {
   StatusBarDisplayMode,
   StatusBarPrimaryMetric,
 } from "./constants";
+import { isSqliteAvailable, promptSqliteInstall } from "./sqlite";
 import {
   createStatusBarItem,
   updateStatusBar,
@@ -219,6 +220,13 @@ export const showDetails = async () => {
  */
 export const activate = (context: vscode.ExtensionContext) => {
   console.log("[Cursor Usage Stats] Activating...");
+
+  // Check for sqlite3 dependency.
+  if (!isSqliteAvailable()) {
+    promptSqliteInstall();
+
+    return;
+  }
 
   // Create status bar.
   const statusBar = createStatusBarItem();

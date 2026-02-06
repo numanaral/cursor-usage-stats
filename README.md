@@ -91,6 +91,7 @@ All data stays local. No external services are contacted except Cursor's own API
 
 - **Cursor IDE** with an active subscription
 - Must be logged into Cursor (authentication is read from local storage)
+- **sqlite3** CLI must be installed (the extension will prompt you to install it if missing)
 
 ## Development
 
