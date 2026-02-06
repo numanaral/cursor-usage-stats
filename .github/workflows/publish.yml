@@ -65,16 +65,21 @@ jobs:
       - name: Package extension
         run: yarn package
 
-      - name: Publish to Open VSX
-        run: npx ovsx publish -p $OVSX_PAT --yarn
-        env:
-          OVSX_PAT: ${{ secrets.OVSX_PAT }}
-
       - name: Create GitHub release
         run: |
           VERSION="v${{ needs.check-version.outputs.version }}"
-          gh release create "$VERSION" *.vsix \
-            --title "$VERSION" \
-            --notes-file CHANGELOG.md
+          if gh release view "$VERSION" > /dev/null 2>&1; then
+            echo "Release $VERSION already exists, uploading assets."
+            gh release upload "$VERSION" *.vsix --clobber
+          else
+            gh release create "$VERSION" *.vsix \
+              --title "$VERSION" \
+              --notes-file CHANGELOG.md
+          fi
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish to Open VSX
+        run: npx ovsx publish -p $OVSX_PAT --yarn || echo "::warning::Open VSX publish failed (version may already exist)."
+        env:
+          OVSX_PAT: ${{ secrets.OVSX_PAT }}
