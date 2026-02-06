@@ -1,0 +1,77 @@
+name: Publish to Open VSX
+
+on:
+  push:
+    branches: [main]
+    paths: [package.json]
+
+jobs:
+  check-version:
+    runs-on: ubuntu-latest
+
+    outputs:
+      version: ${{ steps.check.outputs.version }}
+      changed: ${{ steps.check.outputs.changed }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Check if version changed
+        id: check
+        run: |
+          CURRENT=$(node -p "require('./package.json').version")
+          PREVIOUS=$(git show HEAD~1:package.json | node -p "JSON.parse(require('fs').readFileSync('/dev/stdin','utf8')).version")
+          echo "version=$CURRENT" >> "$GITHUB_OUTPUT"
+          if [ "$CURRENT" != "$PREVIOUS" ]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  publish:
+    needs: check-version
+    if: needs.check-version.outputs.changed == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: yarn
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Lint
+        run: yarn lint
+
+      - name: Build & prepare tests
+        run: yarn pretest
+
+      - name: Run unit tests
+        run: yarn test:unit
+
+      # Integration tests require a display (VS Code Extension Host).
+      - name: Run integration tests
+        run: xvfb-run -a yarn test:integration
+
+      - name: Package extension
+        run: yarn package
+
+      - name: Publish to Open VSX
+        run: npx ovsx publish -p $OVSX_PAT --yarn
+        env:
+          OVSX_PAT: ${{ secrets.OVSX_PAT }}
+
+      - name: Create GitHub release
+        run: |
+          VERSION="v${{ needs.check-version.outputs.version }}"
+          gh release create "$VERSION" *.vsix \
+            --title "$VERSION" \
+            --notes-file CHANGELOG.md
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
