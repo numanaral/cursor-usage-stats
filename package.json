@@ -2,7 +2,7 @@
   "name": "cursor-usage-stats",
   "displayName": "Cursor Usage Stats",
   "description": "Monitor Cursor's included request usage and on-demand spending directly in the status bar with configurable threshold alerts.",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "license": "MIT",
   "author": "Numan <ahmetnuman95@hotmail.com>",
   "publisher": "numanaral",
