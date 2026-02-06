@@ -185,21 +185,20 @@ Cursor uses the [Open VSX Registry](https://open-vsx.org) for extensions. See th
    source .env && npx ovsx create-namespace numanaral -p $OVSX_PAT
    ```
 
-### Steps to Publish
+### Automated (via GitHub Actions)
 
-1. **Package the extension:**
+1. Bump the `version` in `package.json`.
+2. Push to `main` (or merge a PR).
+3. The [publish workflow](.github/workflows/publish.yml) detects the version change and automatically runs tests, publishes to Open VSX, creates a GitHub release, and attaches the `.vsix`.
 
-   ```bash
-   yarn package        # Creates cursor-usage-stats-x.x.x.vsix
-   ```
+> **Note:** Add your `OVSX_PAT` as a [repository secret](https://github.com/numanaral/cursor-usage-stats/settings/secrets/actions) for the workflow to publish.
 
-2. **Publish to Open VSX:**
+### Manual
 
-   ```bash
-   yarn publish        # Builds, packages, and publishes in one step
-   ```
-
-3. **Wait for processing** — The extension may take some time to be available in the marketplace.
+```bash
+yarn package        # Creates cursor-usage-stats-x.x.x.vsix
+yarn publish        # Builds, packages, and publishes to Open VSX
+```
 
 > **Note:** Extensions on Open VSX automatically appear in Cursor's marketplace.
 
