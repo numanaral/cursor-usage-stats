@@ -37,7 +37,8 @@
   ],
   "main": "./dist/extension.js",
   "scripts": {
-    "build": "esbuild src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node --sourcemap",
+    "build": "rm -rf dist && esbuild src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node --sourcemap",
+    "prewatch": "yarn mock generate",
     "watch": "yarn build --watch",
     "package": "yarn build && vsce package",
     "typecheck": "tsc --noEmit",
