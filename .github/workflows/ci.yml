@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: yarn
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Lint
+        run: yarn lint
+
+      - name: Build & prepare tests
+        run: yarn pretest
+
+      - name: Run unit tests
+        run: yarn test:unit
+
+      # Integration tests require a display (VS Code Extension Host).
+      - name: Run integration tests
+        run: xvfb-run -a yarn test:integration
