@@ -1,11 +1,9 @@
 import * as assert from "assert";
 
 import {
-  createStatusBarItem,
-  disposeStatusBar,
   getIncludedRequestSeverity,
   getOnDemandSeverity,
-} from "../../src/statusBar";
+} from "../../src/statusBar/utils";
 import {
   type CursorCombinedUsage,
   type ExtensionConfig,
@@ -13,7 +11,7 @@ import {
   type CursorUsageSummaryApiResponse,
 } from "../../src/types";
 
-suite("StatusBar", () => {
+suite("StatusBar Utils", () => {
   const createMockConfig = (
     overrides: Partial<ExtensionConfig> = {},
   ): ExtensionConfig => {
@@ -225,24 +223,6 @@ suite("StatusBar", () => {
       const config = createMockConfig();
       const result = getOnDemandSeverity(data, config);
       assert.strictEqual(result, "critical");
-    });
-  });
-
-  suite("Status Bar Item", () => {
-    // Note: Tests use their own module instance, separate from the bundled extension.
-    // Each test creates/disposes its own status bar item.
-
-    test("createStatusBarItem creates a status bar item", () => {
-      const item = createStatusBarItem();
-      assert.ok(item);
-      assert.strictEqual(item.command, "cursorUsageStats.showDetails");
-      disposeStatusBar();
-    });
-
-    test("disposeStatusBar cleans up the status bar item", () => {
-      createStatusBarItem();
-      disposeStatusBar();
-      // No error means success.
     });
   });
 });

@@ -6,9 +6,7 @@ Monitor your Cursor IDE usage directly in the status bar. Track included request
 
 > **Note:** This extension is built for [Cursor](https://cursor.com), not VS Code.
 
-## Demo
-
-![Cursor Usage Stats Demo](https://raw.githubusercontent.com/numanaral/cursor-usage-stats/main/assets/cursor-usage-stats-demo.gif)
+![Notification Stacked](https://raw.githubusercontent.com/numanaral/cursor-usage-stats/main/assets/notification-stacked.png)
 
 ## Features
 
@@ -19,6 +17,31 @@ Monitor your Cursor IDE usage directly in the status bar. Track included request
 - **Color-coded Indicators** — Status bar changes color as usage increases:
   - Normal (no color) → Warning (yellow) → Critical (red)
 - **Detailed Breakdown** — Click the status bar for a full usage summary
+- **sqlite3 Install Prompt** — Guides you through installing the required dependency if missing
+
+## Screenshots
+
+### Status Bar
+
+| Normal | Warning | Critical |
+|---|---|---|
+| ![Normal](https://raw.githubusercontent.com/numanaral/cursor-usage-stats/main/assets/toolbar-regular.png) | ![Warning](https://raw.githubusercontent.com/numanaral/cursor-usage-stats/main/assets/toolbar-warning.png) | ![Critical](https://raw.githubusercontent.com/numanaral/cursor-usage-stats/main/assets/toolbar-critical.png) |
+
+### Notifications
+
+| Regular | Warning | Critical |
+|---|---|---|
+| ![Regular](https://raw.githubusercontent.com/numanaral/cursor-usage-stats/main/assets/notification-regular.png) | ![Warning](https://raw.githubusercontent.com/numanaral/cursor-usage-stats/main/assets/notification-warning.png) | ![Critical](https://raw.githubusercontent.com/numanaral/cursor-usage-stats/main/assets/notification-critical.png) |
+
+### sqlite3 Install Prompt
+
+| Missing Dependency | Reload After Install |
+|---|---|
+| ![sqlite3 Prompter](https://raw.githubusercontent.com/numanaral/cursor-usage-stats/main/assets/notification-sqlite-prompter.png) | ![Reload Window](https://raw.githubusercontent.com/numanaral/cursor-usage-stats/main/assets/notification-sqlite-reload-window.png) |
+
+### Full Feature Demo
+
+![Cursor Usage Stats Demo](https://raw.githubusercontent.com/numanaral/cursor-usage-stats/main/assets/cursor-usage-stats-demo.gif)
 
 ## Installation
 
@@ -39,13 +62,13 @@ Search for "Cursor Usage Stats" in Cursor's extension panel.
 
 All settings are under `cursorUsageStats.*` in your settings.
 
-| Setting                                | Default        | Description                                                                 |
-| -------------------------------------- | -------------- | --------------------------------------------------------------------------- |
-| `notifyOnStartup`                      | `true`         | Show usage notification when extension loads                                |
-| `pollIntervalSeconds`                  | `60`           | How often to fetch usage data (in seconds)                                  |
-| `statusBar.displayMode`                | `"both"`       | What to show: `"both"`, `"requests"`, or `"onDemand"`                       |
-| `statusBar.primaryMetric`              | `"onDemand"`   | Which metric controls status bar color: `"includedRequest"` or `"onDemand"` |
-| `api.includedRequestModelKey`          | `"gpt-4"`      | Model key for included requests (auto-detects if not found)                 |
+| Setting                                                    | Default        | Description                                                                 |
+| ---------------------------------------------------------- | -------------- | --------------------------------------------------------------------------- |
+| `notifyOnStartup`                                          | `true`         | Show usage notification when extension loads                                |
+| `pollIntervalSeconds`                                      | `60`           | How often to fetch usage data (in seconds)                                  |
+| `statusBar.displayMode`                                    | `"both"`       | What to show: `"both"`, `"requests"`, or `"onDemand"`                       |
+| `statusBar.primaryMetric`                                  | `"onDemand"`   | Which metric controls status bar color: `"includedRequest"` or `"onDemand"` |
+| `api.includedRequestModelKey`                              | `"gpt-4"`      | Model key for included requests (auto-detects if not found)                 |
 | `alerts.includedRequestUsage.warningPercentageThresholds`  | `[50, 60, 70]` | Warning thresholds (%) for included requests                                |
 | `alerts.includedRequestUsage.criticalPercentageThresholds` | `[80, 90, 95]` | Critical thresholds (%) for included requests                               |
 | `alerts.onDemandUsage.warningPercentageThresholds`         | `[50, 60, 70]` | Warning thresholds (%) for on-demand spending                               |
@@ -91,6 +114,7 @@ All data stays local. No external services are contacted except Cursor's own API
 
 - **Cursor IDE** with an active subscription
 - Must be logged into Cursor (authentication is read from local storage)
+- **sqlite3** CLI must be installed (the extension will prompt you to install it if missing)
 
 ## Development
 
@@ -114,7 +138,8 @@ Press `F5` in Cursor to launch the Extension Development Host.
 ### Testing
 
 ```bash
-yarn test           # Run all tests
+yarn test           # Run all tests (fast, no UI pauses)
+yarn test:slow      # Run tests with 1s pauses between UI steps
 yarn lint           # Check for linting errors
 ```
 
@@ -171,13 +196,7 @@ Cursor uses the [Open VSX Registry](https://open-vsx.org) for extensions. See th
 2. **Publish to Open VSX:**
 
    ```bash
-   source .env && npx ovsx publish cursor-usage-stats-*.vsix -p $OVSX_PAT --yarn
-   ```
-
-   Or build and publish in one step:
-
-   ```bash
-   source .env && npx ovsx publish -p $OVSX_PAT --yarn
+   yarn publish        # Builds, packages, and publishes in one step
    ```
 
 3. **Wait for processing** — The extension may take some time to be available in the marketplace.

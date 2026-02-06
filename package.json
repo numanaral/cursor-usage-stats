@@ -2,7 +2,7 @@
   "name": "cursor-usage-stats",
   "displayName": "Cursor Usage Stats",
   "description": "Monitor Cursor's included request usage and on-demand spending directly in the status bar with configurable threshold alerts.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "license": "MIT",
   "author": "Numan <ahmetnuman95@hotmail.com>",
   "publisher": "numanaral",
@@ -29,12 +29,16 @@
   "categories": [
     "Other"
   ],
+  "extensionKind": [
+    "ui"
+  ],
   "activationEvents": [
     "onStartupFinished"
   ],
   "main": "./dist/extension.js",
   "scripts": {
-    "build": "esbuild src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node --sourcemap",
+    "build": "rm -rf dist && esbuild src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node --sourcemap",
+    "prewatch": "yarn mock generate",
     "watch": "yarn build --watch",
     "package": "yarn build && vsce package",
     "typecheck": "tsc --noEmit",
@@ -44,9 +48,13 @@
     "prettier:fix": "prettier --write .",
     "lint": "yarn typecheck && yarn eslint && yarn prettier",
     "lint:fix": "yarn typecheck && yarn eslint:fix && yarn prettier:fix",
-    "pretest": "yarn build && yarn mock generate && tsc -p . --outDir out",
-    "test": "vscode-test",
-    "mock": "tsx scripts/mocker.ts"
+    "mock": "tsx scripts/mocker.ts",
+    "pretest": "rm -rf out && yarn build && yarn mock generate && tsc -p . --outDir out",
+    "test": "yarn test:unit && yarn test:integration",
+    "test:unit": "mocha out/testing/unit/**/*.test.js --ui tdd --timeout 20000",
+    "test:integration": "vscode-test",
+    "test:slow": "TEST_UI_PAUSE_MS=1000 yarn test:unit && TEST_UI_PAUSE_MS=1000 vscode-test",
+    "publish": "source .env && npx ovsx publish -p $OVSX_PAT --yarn"
   },
   "contributes": {
     "configuration": {

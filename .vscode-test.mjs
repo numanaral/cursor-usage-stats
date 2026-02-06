@@ -1,12 +1,21 @@
 import { defineConfig } from "@vscode/test-cli";
 
-export default defineConfig({
-  files: "out/testing/suite/**/*.test.js",
-  mocha: {
-    ui: "tdd",
-    timeout: 20000,
+const env = {
+  USE_MOCKED_API_DATA: "true",
+  TEST_UI_PAUSE_MS: process.env.TEST_UI_PAUSE_MS || "0",
+};
+
+export default defineConfig([
+  {
+    label: "Integration Tests",
+    files: "out/testing/integration/main/**/*.test.js",
+    mocha: { ui: "tdd", timeout: 20000 },
+    env,
   },
-  env: {
-    USE_MOCKED_API_DATA: "true",
+  {
+    label: "Integration Tests (sqlite)",
+    files: "out/testing/integration/sqlite/**/*.test.js",
+    mocha: { ui: "tdd", timeout: 20000 },
+    env,
   },
-});
+]);
