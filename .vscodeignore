@@ -22,6 +22,7 @@ eslint.config.mjs
 development/**
 testing/**
 scripts/**
+agentic-rules/**
 assets/**
 !assets/logo.png
 
@@ -33,6 +34,7 @@ node_modules/
 .gitignore
 
 # Documentation (dev only)
+AGENTS.md
 plan.md
 vsc-extension-quickstart.md
 *.md
