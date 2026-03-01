@@ -24,6 +24,7 @@ import {
   StatusBarDisplayMode,
   StatusBarTrackedMetric,
 } from "./constants";
+import { configureSettingsWizard } from "./settingsWizard";
 import { isSqliteAvailable, promptSqliteInstall } from "./sqlite";
 import {
   createStatusBarItem,
@@ -553,6 +554,12 @@ export const activate = async (context: vscode.ExtensionContext) => {
     vscode.commands.registerCommand(
       "cursorUsageStats.showDetails",
       showDetails,
+    ),
+    vscode.commands.registerCommand(
+      "cursorUsageStats.configureSettings",
+      () => {
+        return configureSettingsWizard();
+      },
     ),
     vscode.commands.registerCommand("cursorUsageStats.tips", () => {
       const config = getConfig();

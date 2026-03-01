@@ -197,6 +197,10 @@
         "title": "Cursor Usage Stats: Show Details"
       },
       {
+        "command": "cursorUsageStats.configureSettings",
+        "title": "Cursor Usage Stats: Configure Settings"
+      },
+      {
         "command": "cursorUsageStats.tips",
         "title": "Cursor Usage Stats: Tips & Tricks"
       }
