@@ -1,6 +1,6 @@
 import { execSync } from "child_process";
 
-const BRANCH_PREFIX = "numanaral";
+const BRANCH_PREFIX = "release";
 
 type BumpType = "patch" | "minor" | "major";
 
@@ -81,7 +81,7 @@ const release = (bumpType: BumpType, dryRun: boolean) => {
   console.log(`  New version:     ${newVersion}\n`);
 
   // Create and checkout release branch.
-  const branchName = `${BRANCH_PREFIX}/release-v${newVersion}`;
+  const branchName = `${BRANCH_PREFIX}/v${newVersion}`;
   runVisible(`git checkout -b ${branchName}`);
 
   // Stage and commit.
