@@ -47,6 +47,13 @@ import { validateThresholds } from "./utils";
 /** Internal page size for events API calls. */
 const EVENTS_PAGE_SIZE = 50;
 
+/** globalState keys for cross-window alert dedup. */
+const GLOBAL_STATE_KEYS = {
+  MAX_MODE_LAST_ALERTED: "maxModeLastAlertedAt",
+  SPENDING_LAST_ALERTED: "spendingLastAlertedAt",
+} as const;
+
+let extensionGlobalState: vscode.Memento | null = null;
 let pollInterval: NodeJS.Timeout | null = null;
 let alertPollInterval: NodeJS.Timeout | null = null;
 let lastBillingCycleEnd: string | null = null;
@@ -428,8 +435,47 @@ export const refreshAlerts = async () => {
 
     const events = response.usageEventsDisplay;
 
-    checkMaxModeDetection(events, config.alerts);
-    checkSpendingGuard(events, config.alerts);
+    // Suppress alerts that another window already showed by
+    // comparing globalState timestamps against each feature's
+    // lastCheckedDate. If another window alerted after our
+    // last checkpoint, skip -- the user already knows.
+    const maxModeAlreadyAlerted =
+      maxModeReady &&
+      (extensionGlobalState?.get<number>(
+        GLOBAL_STATE_KEYS.MAX_MODE_LAST_ALERTED,
+      ) ?? 0) > getMaxModeLastCheckedDate();
+
+    const spendingAlreadyAlerted =
+      spendingReady &&
+      (extensionGlobalState?.get<number>(
+        GLOBAL_STATE_KEYS.SPENDING_LAST_ALERTED,
+      ) ?? 0) > getSpendingGuardLastCheckedDate();
+
+    if (!maxModeAlreadyAlerted) {
+      const wasPending = isMaxModeNotificationPending();
+      checkMaxModeDetection(events, config.alerts);
+      if (!wasPending && isMaxModeNotificationPending()) {
+        extensionGlobalState?.update(
+          GLOBAL_STATE_KEYS.MAX_MODE_LAST_ALERTED,
+          Date.now(),
+        );
+      }
+    } else {
+      setMaxModeLastCheckedDate(endDate);
+    }
+
+    if (!spendingAlreadyAlerted) {
+      const wasPending = isSpendingGuardNotificationPending();
+      checkSpendingGuard(events, config.alerts);
+      if (!wasPending && isSpendingGuardNotificationPending()) {
+        extensionGlobalState?.update(
+          GLOBAL_STATE_KEYS.SPENDING_LAST_ALERTED,
+          Date.now(),
+        );
+      }
+    } else {
+      setSpendingGuardLastCheckedDate(endDate);
+    }
 
     console.log("[Cursor Usage Stats] Alerts refreshed.");
   } catch (error) {
@@ -543,6 +589,8 @@ export const showDetails = async () => {
  */
 export const activate = async (context: vscode.ExtensionContext) => {
   console.log("[Cursor Usage Stats] Activating...");
+
+  extensionGlobalState = context.globalState;
 
   // Migrate old settings to new schema.
   await migrateSettings(context);
