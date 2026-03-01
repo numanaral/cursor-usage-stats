@@ -13,6 +13,8 @@ import {
   isSpendingGuardNotificationPending,
   markExceededThresholdsAsTriggered,
   resetMaxModeDetectionState,
+  setMaxModeLastCheckedDate,
+  setSpendingGuardLastCheckedDate,
   resetSpendingGuardState,
   resetTriggeredThresholds,
   showUsageSummaryNotification,
@@ -403,6 +405,8 @@ export const refreshAlerts = async () => {
     return;
   }
 
+  const endDate = Date.now();
+
   try {
     // Use the earliest lastCheckedDate among features that
     // actually need checking.
@@ -415,7 +419,6 @@ export const refreshAlerts = async () => {
     }
 
     const startDate = Math.min(...candidates);
-    const endDate = Date.now();
 
     const response = await fetchRecentEvents(
       startDate,
@@ -430,6 +433,16 @@ export const refreshAlerts = async () => {
 
     console.log("[Cursor Usage Stats] Alerts refreshed.");
   } catch (error) {
+    // Advance checkpoints so a stale checkpoint doesn't
+    // accumulate events across a long auth-failure gap and
+    // fire a false alert when the API recovers.
+    if (maxModeReady) {
+      setMaxModeLastCheckedDate(endDate);
+    }
+    if (spendingReady) {
+      setSpendingGuardLastCheckedDate(endDate);
+    }
+
     console.error("[Cursor Usage Stats] Alerts error:", error);
   }
 };
