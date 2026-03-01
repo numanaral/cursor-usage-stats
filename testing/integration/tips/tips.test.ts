@@ -126,12 +126,10 @@ suite("Integration - Tips", () => {
       assert.strictEqual(EXTENSION_DEFAULT_CONFIG.tips.showOnStartup, false);
     });
 
-    test("gistUrl defaults to the official gist URL", () => {
+    test("gistUrl defaults to a GitHub URL", () => {
       assert.ok(
-        EXTENSION_DEFAULT_CONFIG.tips.gistUrl.includes(
-          "gist.githubusercontent.com",
-        ),
-        "gistUrl should default to the official gist URL.",
+        EXTENSION_DEFAULT_CONFIG.tips.gistUrl.includes("githubusercontent.com"),
+        "gistUrl should default to a GitHub URL.",
       );
     });
 

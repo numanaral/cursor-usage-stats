@@ -174,7 +174,10 @@ suite("Integration - Settings Wizard", () => {
     test("tips defaults match EXTENSION_DEFAULT_CONFIG", () => {
       const defaults = EXTENSION_DEFAULT_CONFIG.tips;
       assert.strictEqual(defaults.showOnStartup, false);
-      assert.strictEqual(defaults.gistUrl, "");
+      assert.ok(
+        defaults.gistUrl.includes("githubusercontent.com"),
+        "gistUrl should default to a GitHub URL.",
+      );
     });
   });
 });
