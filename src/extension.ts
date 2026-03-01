@@ -2,7 +2,18 @@ import * as vscode from "vscode";
 
 import {
   checkAllThresholds,
+  checkMaxModeDetection,
+  checkSpendingGuard,
+  fetchRecentEvents,
+  getMaxModeLastCheckedDate,
+  getSpendingGuardLastCheckedDate,
+  isMaxModeIgnoredForSession,
+  isMaxModeNotificationPending,
+  isSpendingGuardIgnoredForSession,
+  isSpendingGuardNotificationPending,
   markExceededThresholdsAsTriggered,
+  resetMaxModeDetectionState,
+  resetSpendingGuardState,
   resetTriggeredThresholds,
   showUsageSummaryNotification,
 } from "./alerts";
@@ -29,7 +40,11 @@ import {
 } from "./types";
 import { validateThresholds } from "./utils";
 
+/** Internal page size for events API calls. */
+const EVENTS_PAGE_SIZE = 50;
+
 let pollInterval: NodeJS.Timeout | null = null;
+let alertPollInterval: NodeJS.Timeout | null = null;
 let lastBillingCycleEnd: string | null = null;
 let isFirstLoad = true;
 
@@ -295,6 +310,137 @@ export const startPolling = () => {
 };
 
 /**
+ * Returns whether either MAX mode or spending guard is enabled.
+ */
+const isAlertPollingEnabled = (config: ExtensionConfig) => {
+  return (
+    config.alerts.maxModeDetection.enabled ||
+    config.alerts.spendingGuard.enabled
+  );
+};
+
+/**
+ * Starts the alert polling interval (MAX mode + spending guard).
+ *
+ * Uses the minimum poll interval of the two features so
+ * both get checked on time.
+ */
+export const startAlertPolling = () => {
+  const config = getConfig();
+
+  if (alertPollInterval) {
+    clearInterval(alertPollInterval);
+  }
+
+  if (!isAlertPollingEnabled(config)) {
+    console.log("[Cursor Usage Stats] Alert polling disabled.");
+
+    return;
+  }
+
+  // Use the shortest poll interval so neither feature misses
+  // its window.
+  const intervalMs =
+    Math.min(
+      config.alerts.maxModeDetection.pollIntervalSeconds,
+      config.alerts.spendingGuard.pollIntervalSeconds,
+    ) * 1000;
+  alertPollInterval = setInterval(refreshAlerts, intervalMs);
+
+  console.log("[Cursor Usage Stats] Alert poll started.");
+};
+
+/**
+ * Returns whether a given alert feature needs an event check.
+ *
+ * A feature needs checking when it is enabled, not ignored
+ * for the session, not pending a notification response, and
+ * not snoozed (lastCheckedDate in the future).
+ */
+const featureNeedsCheck = (
+  enabled: boolean,
+  ignored: boolean,
+  pending: boolean,
+  lastChecked: number,
+) => {
+  return enabled && !ignored && !pending && lastChecked <= Date.now();
+};
+
+/**
+ * Fetches recent events and runs MAX mode + spending guard checks.
+ *
+ * Skips the API call entirely when neither feature needs
+ * checking (pending, snoozed, ignored, or disabled).
+ *
+ * Each feature manages its own `lastCheckedDate`. The API
+ * is called with the earliest of the two dates so both
+ * features get the data they need.
+ */
+export const refreshAlerts = async () => {
+  const config = getConfig();
+
+  if (!isAlertPollingEnabled(config)) {
+    return;
+  }
+
+  const maxModeReady = featureNeedsCheck(
+    config.alerts.maxModeDetection.enabled,
+    isMaxModeIgnoredForSession(),
+    isMaxModeNotificationPending(),
+    getMaxModeLastCheckedDate(),
+  );
+  const spendingReady = featureNeedsCheck(
+    config.alerts.spendingGuard.enabled,
+    isSpendingGuardIgnoredForSession(),
+    isSpendingGuardNotificationPending(),
+    getSpendingGuardLastCheckedDate(),
+  );
+
+  // Nothing to check -- skip the API call entirely.
+  if (!maxModeReady && !spendingReady) {
+    return;
+  }
+
+  try {
+    // Use the earliest lastCheckedDate among features that
+    // actually need checking.
+    const candidates: number[] = [];
+    if (maxModeReady) {
+      candidates.push(getMaxModeLastCheckedDate());
+    }
+    if (spendingReady) {
+      candidates.push(getSpendingGuardLastCheckedDate());
+    }
+
+    const startDate = Math.min(...candidates);
+    const endDate = Date.now();
+
+    const response = await fetchRecentEvents(
+      startDate,
+      endDate,
+      EVENTS_PAGE_SIZE,
+    );
+
+    const events = response.usageEventsDisplay;
+
+    checkMaxModeDetection(events, config.alerts);
+    checkSpendingGuard(events, config.alerts);
+
+    console.log("[Cursor Usage Stats] Alerts refreshed.");
+  } catch (error) {
+    console.error("[Cursor Usage Stats] Alerts error:", error);
+  }
+};
+
+/**
+ * Refreshes alerts and restarts the alert polling interval.
+ */
+export const refreshAndResetAlertPoll = async () => {
+  startAlertPolling();
+  await refreshAlerts();
+};
+
+/**
  * Refreshes usage and restarts the polling interval.
  */
 export const refreshAndResetPoll = async () => {
@@ -321,6 +467,8 @@ export const refreshUsage = async () => {
       lastBillingCycleEnd !== data.summary.billingCycleEnd
     ) {
       resetTriggeredThresholds();
+      resetMaxModeDetectionState();
+      resetSpendingGuardState();
     }
     lastBillingCycleEnd = data.summary.billingCycleEnd;
 
@@ -408,6 +556,7 @@ export const activate = async (context: vscode.ExtensionContext) => {
     vscode.workspace.onDidChangeConfiguration((e) => {
       if (e.affectsConfiguration("cursorUsageStats")) {
         startPolling();
+        startAlertPolling();
         refreshUsage();
       }
     }),
@@ -416,6 +565,7 @@ export const activate = async (context: vscode.ExtensionContext) => {
   // Initial fetch and start polling.
   refreshUsage();
   startPolling();
+  startAlertPolling();
 
   console.log("[Cursor Usage Stats] Activated.");
 };
@@ -427,6 +577,10 @@ export const deactivate = () => {
   if (pollInterval) {
     clearInterval(pollInterval);
     pollInterval = null;
+  }
+  if (alertPollInterval) {
+    clearInterval(alertPollInterval);
+    alertPollInterval = null;
   }
   disposeStatusBar();
 
