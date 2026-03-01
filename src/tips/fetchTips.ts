@@ -47,9 +47,7 @@ export const fetchTips = async (gistUrl?: string) => {
 
     return cachedTips;
   } catch {
-    console.warn(
-      "[Cursor Usage Stats] Tips fetch error, using defaults.",
-    );
+    console.warn("[Cursor Usage Stats] Tips fetch error, using defaults.");
     cachedTips = DEFAULT_TIPS as Tip[];
 
     return cachedTips;

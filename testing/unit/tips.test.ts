@@ -34,9 +34,7 @@ suite("Tips", () => {
     });
 
     test("contains tips from all categories", () => {
-      const categories = new Set<string>(
-        DEFAULT_TIPS.map((t) => t.category),
-      );
+      const categories = new Set<string>(DEFAULT_TIPS.map((t) => t.category));
 
       assert.ok(categories.has(TipCategory.Cursor), "Missing cursor tips.");
       assert.ok(
