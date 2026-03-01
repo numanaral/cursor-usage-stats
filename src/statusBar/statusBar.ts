@@ -3,7 +3,7 @@ import * as vscode from "vscode";
 import { getModelUsage } from "../api";
 import {
   StatusBarDisplayMode,
-  StatusBarPrimaryMetric,
+  StatusBarTrackedMetric,
   ThresholdSeverity,
 } from "../constants";
 import {
@@ -77,7 +77,7 @@ export const updateStatusBar = (
   const onDemand = data.summary.individualUsage.onDemand;
 
   const parts: string[] = [];
-  const { displayMode } = config.statusBar;
+  const { displayMode } = config.alerts.usageThreshold.statusBar;
 
   // Request usage from /api/usage.
   if (
@@ -106,9 +106,10 @@ export const updateStatusBar = (
 
   statusBarItem.text = `$(graph) ${lastDisplayText}`;
 
-  // Apply color based on primaryMetric.
+  // Apply color based on trackedMetric.
+  const { trackedMetric } = config.alerts.usageThreshold.statusBar;
   const severity =
-    config.statusBar.primaryMetric === StatusBarPrimaryMetric.IncludedRequest
+    trackedMetric === StatusBarTrackedMetric.IncludedRequest
       ? getIncludedRequestSeverity(modelUsage, config)
       : getOnDemandSeverity(data, config);
 

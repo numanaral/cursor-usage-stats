@@ -5,6 +5,7 @@
 import * as fs from "fs";
 import * as path from "path";
 
+import { type CursorUsageEventsApiResponse } from "./alerts/types";
 import {
   type CursorCombinedUsage,
   type CursorUsageApiResponse,
@@ -26,6 +27,7 @@ Then rebuild the extension:
 interface MockApiData {
   usage: CursorUsageApiResponse;
   summary: CursorUsageSummaryApiResponse;
+  events?: CursorUsageEventsApiResponse;
 }
 
 /**
@@ -76,4 +78,21 @@ export const getMockCombinedUsage = (): CursorCombinedUsage => {
     usage: data.usage,
     summary: data.summary,
   };
+};
+
+/** Default empty events response when events mock data is missing. */
+const EMPTY_EVENTS_RESPONSE: CursorUsageEventsApiResponse = {
+  totalUsageEventsCount: 0,
+  usageEventsDisplay: [],
+};
+
+/**
+ * Gets mock usage events data.
+ * Returns an empty events response if events data is not
+ * present in the mock file.
+ */
+export const getMockUsageEvents = (): CursorUsageEventsApiResponse => {
+  const data = readMockApiData();
+
+  return data.events || EMPTY_EVENTS_RESPONSE;
 };

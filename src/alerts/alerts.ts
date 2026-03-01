@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 
 import { getModelUsage } from "../api";
-import { StatusBarPrimaryMetric, ThresholdSeverity } from "../constants";
+import { StatusBarTrackedMetric, ThresholdSeverity } from "../constants";
 import { getIncludedRequestSeverity, getOnDemandSeverity } from "../statusBar";
 import {
   type ExtensionAlertThresholds,
@@ -32,26 +32,33 @@ export const showNotification = (
   }
 
   if (severity === ThresholdSeverity.Critical) {
-    return vscode.window.showErrorMessage(message, "Refresh", "Open Dashboard");
+    return vscode.window.showErrorMessage(
+      message,
+      "Web Dashboard",
+      "Tips",
+      "Configure Settings",
+    );
   }
 
   if (severity === ThresholdSeverity.Warning) {
     return vscode.window.showWarningMessage(
       message,
-      "Refresh",
-      "Open Dashboard",
+      "Web Dashboard",
+      "Tips",
+      "Configure Settings",
     );
   }
 
   return vscode.window.showInformationMessage(
     message,
-    "Refresh",
-    "Open Dashboard",
+    "Configure",
+    "Tips",
+    "Dashboard",
   );
 };
 
 /**
- * Handles notification button selection.
+ * Handles notification button selection for threshold alerts.
  */
 export const handleNotificationSelection = (
   selection: string | undefined,
@@ -63,6 +70,21 @@ export const handleNotificationSelection = (
     vscode.env.openExternal(
       vscode.Uri.parse("https://cursor.com/dashboard?tab=usage"),
     );
+  }
+};
+
+/**
+ * Handles startup notification button selection.
+ */
+const handleStartupSelection = (selection: string | undefined) => {
+  if (selection === "Dashboard") {
+    vscode.env.openExternal(
+      vscode.Uri.parse("https://cursor.com/dashboard?tab=usage"),
+    );
+  } else if (selection === "Tips") {
+    vscode.commands.executeCommand("cursorUsageStats.tips");
+  } else if (selection === "Configure") {
+    vscode.commands.executeCommand("cursorUsageStats.configureSettings");
   }
 };
 
@@ -141,7 +163,7 @@ export const checkIncludedRequestThresholds = (
 
   checkThresholds({
     currentPercent: (modelUsage.numRequests / modelUsage.maxRequestUsage) * 100,
-    thresholds: config.alerts.includedRequestUsage,
+    thresholds: config.alerts.usageThreshold.includedRequestUsage,
     triggeredSet: getTriggeredIncludedRequestThresholds(),
     formatMessage: (actualPercent, thresholdValue) => {
       return `Requests: ${modelUsage.numRequests}/${modelUsage.maxRequestUsage} (${actualPercent}%) - Passed ${thresholdValue}% threshold`;
@@ -166,7 +188,7 @@ export const checkOnDemandThresholds = (
 
   checkThresholds({
     currentPercent: (onDemand.used / onDemand.limit) * 100,
-    thresholds: config.alerts.onDemandUsage,
+    thresholds: config.alerts.usageThreshold.onDemandUsage,
     triggeredSet: getTriggeredOnDemandThresholds(),
     formatMessage: (actualPercent, thresholdValue) => {
       return `On-Demand: ${formatCents(onDemand.used)}/${formatCents(onDemand.limit)} (${actualPercent}%) - Passed ${thresholdValue}% threshold`;
@@ -188,12 +210,13 @@ export const checkAllThresholds = (
 };
 
 /**
- * Shows a notification with current usage summary.
+ * Shows a notification with current usage summary on startup.
+ *
+ * Buttons: "Dashboard", "Tips", "Configure".
  */
 export const showUsageSummaryNotification = (
   data: CursorCombinedUsage,
   config: ExtensionConfig,
-  onRefresh: () => void,
 ) => {
   const modelUsage = getModelUsage(
     data.usage,
@@ -224,14 +247,15 @@ export const showUsageSummaryNotification = (
 
   const message = parts.join(" | ");
 
-  // Determine severity based on primaryMetric.
+  // Determine severity based on trackedMetric.
+  const { trackedMetric } = config.alerts.usageThreshold.statusBar;
   const severity =
-    config.statusBar.primaryMetric === StatusBarPrimaryMetric.IncludedRequest
+    trackedMetric === StatusBarTrackedMetric.IncludedRequest
       ? getIncludedRequestSeverity(modelUsage, config)
       : getOnDemandSeverity(data, config);
 
   showNotification(message, severity).then((selection) => {
-    handleNotificationSelection(selection, onRefresh);
+    handleStartupSelection(selection);
   });
 };
 

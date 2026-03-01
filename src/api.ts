@@ -14,25 +14,60 @@ import {
 import { isModelUsage } from "./utils";
 
 /**
- * Fetches from a Cursor API endpoint with authentication.
+ * Builds common auth headers for Cursor API requests.
  */
-export const fetchWithAuth = async <T>(url: string): Promise<T> => {
+const buildAuthHeaders = () => {
   const credentials = getAuthCredentials();
   const cookie = buildAuthCookie(credentials);
 
-  const response = await fetch(url, {
-    headers: {
-      Cookie: cookie,
-      "Content-Type": "application/json",
-    },
-  });
+  return {
+    Cookie: cookie,
+    "Content-Type": "application/json",
+  } as const;
+};
 
+/**
+ * Handles response errors from Cursor API requests.
+ */
+const handleResponse = async <T>(response: Response) => {
   if (!response.ok) {
     const error = await response.text();
     throw new Error(`Failed to fetch: ${response.status} - ${error}`);
   }
 
   return response.json() as Promise<T>;
+};
+
+/**
+ * Fetches from a Cursor API endpoint with authentication (GET).
+ */
+export const fetchWithAuth = async <T>(url: string) => {
+  const response = await fetch(url, {
+    headers: buildAuthHeaders(),
+  });
+
+  return handleResponse<T>(response);
+};
+
+/**
+ * Posts to a Cursor API endpoint with authentication.
+ *
+ * Includes `Origin` header required by dashboard endpoints.
+ */
+export const fetchWithAuthPost = async <T>(
+  url: string,
+  body: Record<string, unknown>,
+) => {
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      ...buildAuthHeaders(),
+      Origin: "https://cursor.com",
+    },
+    body: JSON.stringify(body),
+  });
+
+  return handleResponse<T>(response);
 };
 
 /**

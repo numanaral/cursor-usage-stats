@@ -52,25 +52,26 @@
     "pretest": "rm -rf out && yarn build && yarn mock generate && tsc -p . --outDir out",
     "test:unit": "mocha out/testing/unit/**/*.test.js --ui tdd --timeout 20000",
     "test:integration": "vscode-test",
+    "test:integration:only": "yarn pretest && TEST_UI_PAUSE_MS=1000 sh -c 'vscode-test --label \"Integration Tests ($0)\"'",
     "test": "yarn test:unit && yarn test:integration",
-    "test:slow": "TEST_UI_PAUSE_MS=1000 yarn test:unit && TEST_UI_PAUSE_MS=1000 vscode-test",
+    "test:slow": "TEST_UI_PAUSE_MS=1000 yarn test",
     "release": "tsx scripts/release.ts"
   },
   "contributes": {
     "configuration": {
       "title": "Cursor Usage Stats",
       "properties": {
-        "cursorUsageStats.notifyOnStartup": {
+        "cursorUsageStats.showWelcomeMessage": {
           "type": "boolean",
           "default": true,
-          "description": "Show a notification with current usage when the extension loads."
+          "description": "Show a welcome notification with quick actions when the extension first loads."
         },
-        "cursorUsageStats.pollIntervalSeconds": {
+        "cursorUsageStats.alerts.usageThreshold.pollIntervalSeconds": {
           "type": "number",
           "default": 60,
-          "description": "How often to fetch usage data in seconds."
+          "description": "How often to fetch usage data in seconds. Shared between the status bar and threshold alerts."
         },
-        "cursorUsageStats.statusBar.displayMode": {
+        "cursorUsageStats.alerts.usageThreshold.statusBar.displayMode": {
           "type": "string",
           "enum": [
             "both",
@@ -80,21 +81,16 @@
           "default": "both",
           "description": "What to display in the status bar: 'both' shows requests and on-demand, 'requests' shows only request count, 'onDemand' shows only spending."
         },
-        "cursorUsageStats.statusBar.primaryMetric": {
+        "cursorUsageStats.alerts.usageThreshold.statusBar.trackedMetric": {
           "type": "string",
           "enum": [
             "includedRequest",
             "onDemand"
           ],
           "default": "onDemand",
-          "description": "Which metric determines the status bar color and notification severity."
+          "description": "Which metric determines the status bar color and threshold alert severity."
         },
-        "cursorUsageStats.api.includedRequestModelKey": {
-          "type": "string",
-          "default": "gpt-4",
-          "description": "The model key in Cursor's /api/usage response for included requests. Falls back to auto-detecting a key with numRequestsTotal and maxRequestUsage if not found."
-        },
-        "cursorUsageStats.alerts.includedRequestUsage.warningPercentageThresholds": {
+        "cursorUsageStats.alerts.usageThreshold.includedRequestUsage.warningPercentageThresholds": {
           "type": "array",
           "default": [
             50,
@@ -103,7 +99,7 @@
           ],
           "description": "Usage percentages that trigger warning alerts for included requests. Use an empty array to disable."
         },
-        "cursorUsageStats.alerts.includedRequestUsage.criticalPercentageThresholds": {
+        "cursorUsageStats.alerts.usageThreshold.includedRequestUsage.criticalPercentageThresholds": {
           "type": "array",
           "default": [
             80,
@@ -112,7 +108,7 @@
           ],
           "description": "Usage percentages that trigger critical alerts for included requests. Use an empty array to disable."
         },
-        "cursorUsageStats.alerts.onDemandUsage.warningPercentageThresholds": {
+        "cursorUsageStats.alerts.usageThreshold.onDemandUsage.warningPercentageThresholds": {
           "type": "array",
           "default": [
             50,
@@ -121,7 +117,7 @@
           ],
           "description": "Usage percentages that trigger warning alerts for on-demand spending. Use an empty array to disable."
         },
-        "cursorUsageStats.alerts.onDemandUsage.criticalPercentageThresholds": {
+        "cursorUsageStats.alerts.usageThreshold.onDemandUsage.criticalPercentageThresholds": {
           "type": "array",
           "default": [
             80,
@@ -129,6 +125,64 @@
             95
           ],
           "description": "Usage percentages that trigger critical alerts for on-demand spending. Use an empty array to disable."
+        },
+        "cursorUsageStats.alerts.maxModeDetection.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable MAX mode detection alerts. Notifies when any MAX mode call is detected since the last check."
+        },
+        "cursorUsageStats.alerts.maxModeDetection.notificationMode": {
+          "type": "string",
+          "enum": [
+            "toast",
+            "modal"
+          ],
+          "default": "modal",
+          "description": "How to display MAX mode alerts. 'toast' shows a standard notification, 'modal' shows a blocking dialog."
+        },
+        "cursorUsageStats.alerts.maxModeDetection.pollIntervalSeconds": {
+          "type": "number",
+          "default": 300,
+          "description": "How often to check for MAX mode calls in seconds. Default is 5 minutes."
+        },
+        "cursorUsageStats.alerts.spendingGuard.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable spending guard alerts. Notifies when spending since the last check exceeds the cost threshold."
+        },
+        "cursorUsageStats.alerts.spendingGuard.notificationMode": {
+          "type": "string",
+          "enum": [
+            "toast",
+            "modal"
+          ],
+          "default": "modal",
+          "description": "How to display spending guard alerts. 'toast' shows a standard notification, 'modal' shows a blocking dialog."
+        },
+        "cursorUsageStats.alerts.spendingGuard.pollIntervalSeconds": {
+          "type": "number",
+          "default": 300,
+          "description": "How often to check for expensive requests in seconds. Default is 5 minutes."
+        },
+        "cursorUsageStats.alerts.spendingGuard.costThreshold": {
+          "type": "number",
+          "default": 20,
+          "description": "Dollar amount that triggers the spending guard alert. Alerts when spending since last check exceeds this value."
+        },
+        "cursorUsageStats.tips.showOnStartup": {
+          "type": "boolean",
+          "default": false,
+          "description": "Show a random AI tip on extension startup."
+        },
+        "cursorUsageStats.tips.gistUrl": {
+          "type": "string",
+          "default": "https://raw.githubusercontent.com/numanaral/cursor-usage-stats/main/src/tips/defaultTips.json",
+          "description": "URL to a JSON file containing tips. Must return a JSON array of objects with 'title' (string), 'description' (string), and 'category' (string) fields. Leave empty to use bundled defaults only."
+        },
+        "cursorUsageStats.api.includedRequestModelKey": {
+          "type": "string",
+          "default": "gpt-4",
+          "description": "The model key in Cursor's /api/usage response for included requests. Falls back to auto-detecting a key with numRequestsTotal and maxRequestUsage if not found."
         }
       }
     },

@@ -61,16 +61,17 @@ export interface CursorCombinedUsage {
   summary: CursorUsageSummaryApiResponse;
 }
 
+import { type AlertsConfig } from "./alerts/types";
 import {
   type StatusBarDisplayMode,
-  type StatusBarPrimaryMetric,
+  type StatusBarTrackedMetric,
   type ThresholdSeverity,
 } from "./constants";
 
 export type ExtensionStatusBarDisplayMode =
   (typeof StatusBarDisplayMode)[keyof typeof StatusBarDisplayMode];
-export type ExtensionStatusBarPrimaryMetric =
-  (typeof StatusBarPrimaryMetric)[keyof typeof StatusBarPrimaryMetric];
+export type ExtensionStatusBarTrackedMetric =
+  (typeof StatusBarTrackedMetric)[keyof typeof StatusBarTrackedMetric];
 export type ExtensionThresholdSeverity =
   (typeof ThresholdSeverity)[keyof typeof ThresholdSeverity];
 
@@ -85,18 +86,26 @@ export interface ExtensionNotificationRecord {
   timestamp: number;
 }
 
+export interface TipsConfig {
+  showOnStartup: boolean;
+  gistUrl: string;
+}
+
 export interface ExtensionConfig {
-  notifyOnStartup: boolean;
-  pollIntervalSeconds: number;
-  statusBar: {
-    displayMode: ExtensionStatusBarDisplayMode;
-    primaryMetric: ExtensionStatusBarPrimaryMetric;
-  };
+  showWelcomeMessage: boolean;
   api: {
     includedRequestModelKey: string;
   };
   alerts: {
-    includedRequestUsage: ExtensionAlertThresholds;
-    onDemandUsage: ExtensionAlertThresholds;
-  };
+    usageThreshold: {
+      pollIntervalSeconds: number;
+      statusBar: {
+        displayMode: ExtensionStatusBarDisplayMode;
+        trackedMetric: ExtensionStatusBarTrackedMetric;
+      };
+      includedRequestUsage: ExtensionAlertThresholds;
+      onDemandUsage: ExtensionAlertThresholds;
+    };
+  } & AlertsConfig;
+  tips: TipsConfig;
 }
