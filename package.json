@@ -195,6 +195,10 @@
       {
         "command": "cursorUsageStats.showDetails",
         "title": "Cursor Usage Stats: Show Details"
+      },
+      {
+        "command": "cursorUsageStats.tips",
+        "title": "Cursor Usage Stats: Tips & Tricks"
       }
     ]
   },

@@ -32,6 +32,7 @@ import {
   setStatusBarLoading,
   disposeStatusBar,
 } from "./statusBar";
+import { showTips, showRandomTip } from "./tips";
 import {
   type ExtensionConfig,
   type ExtensionStatusBarDisplayMode,
@@ -484,6 +485,10 @@ export const refreshUsage = async () => {
         showUsageSummaryNotification(data, config);
       }
 
+      if (config.tips.showOnStartup) {
+        setTimeout(() => showRandomTip(config.tips.gistUrl), 1500);
+      }
+
       isFirstLoad = false;
 
       return;
@@ -549,6 +554,11 @@ export const activate = async (context: vscode.ExtensionContext) => {
       "cursorUsageStats.showDetails",
       showDetails,
     ),
+    vscode.commands.registerCommand("cursorUsageStats.tips", () => {
+      const config = getConfig();
+
+      return showTips(config.tips.gistUrl);
+    }),
   );
 
   // Listen for config changes.
