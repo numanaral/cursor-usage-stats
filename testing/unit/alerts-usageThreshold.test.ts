@@ -6,6 +6,7 @@ import {
   markExceededThresholdsAsTriggered,
   resetTriggeredThresholds,
 } from "../../src/alerts/utils";
+import { EXTENSION_DEFAULT_CONFIG } from "../../src/constants";
 import {
   type CursorCombinedUsage,
   type ExtensionConfig,
@@ -14,30 +15,17 @@ import {
   type CursorUsageSummaryApiResponse,
 } from "../../src/types";
 
-suite("Alerts", () => {
+suite("Alerts - Usage Threshold", () => {
   const createMockConfig = (
     overrides: Partial<ExtensionConfig> = {},
   ): ExtensionConfig => {
     return {
-      notifyOnStartup: true,
-      pollIntervalSeconds: 60,
-      statusBar: {
-        displayMode: "both",
-        primaryMetric: "onDemand",
-      },
+      showWelcomeMessage: true,
       api: {
         includedRequestModelKey: "gpt-4",
       },
-      alerts: {
-        includedRequestUsage: {
-          warningPercentageThresholds: [50, 60, 70],
-          criticalPercentageThresholds: [80, 90, 95],
-        },
-        onDemandUsage: {
-          warningPercentageThresholds: [50, 60, 70],
-          criticalPercentageThresholds: [80, 90, 95],
-        },
-      },
+      alerts: EXTENSION_DEFAULT_CONFIG.alerts,
+      tips: EXTENSION_DEFAULT_CONFIG.tips,
       ...overrides,
     };
   };

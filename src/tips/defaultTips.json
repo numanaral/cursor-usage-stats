@@ -1,0 +1,67 @@
+[
+  {
+    "title": "Use a Thinking Model to Plan, Then a Fast Model to Execute",
+    "description": "Start every non-trivial task with a reasoning model like Claude Opus 4.6 or GPT-5 to generate a numbered, step-by-step plan with clear acceptance criteria. Once the plan is solid, switch to a faster model like Claude Sonnet 4.5 or Haiku 4.5 to execute each step. The plan constrains the cheaper model so it doesn't drift. You get top-tier reasoning without burning expensive tokens on boilerplate. Write the plan to a PLAN.md file so it survives context resets and new chats.",
+    "category": "ai-general"
+  },
+  {
+    "title": "Give the Agent a Self-Healing Test Loop",
+    "description": "Write failing tests first, then tell the agent: 'Implement code to make all tests pass. Run the tests after every change. If they fail, read the output and fix until green.' Cursor's own best practices page confirms agents perform best when they have a clear target to iterate against — failing tests are that target. With YOLO mode on, the agent will run shell commands and auto-fix lint errors without asking. This turns it from a one-shot generator into a self-correcting loop.",
+    "category": "ai-general"
+  },
+  {
+    "title": "Create Skill Files for Repeatable Team Patterns",
+    "description": "As of Cursor 2.4 (Jan 2026), you can create SKILL.md files in .cursor/skills/. Unlike rules which are always-on or glob-matched, skills are discovered contextually or invoked via slash command. Use them for repeatable procedures: 'how to create a new API endpoint', 'how to add a database migration', 'how to scaffold a new component'. The agent reads the skill and follows the exact steps, file structure, and conventions you defined. This is far more reliable than hoping it infers your patterns.",
+    "category": "cursor"
+  },
+  {
+    "title": "Use Background Agents for Parallel Workstreams",
+    "description": "Cursor's Background Agents let you spawn multiple agents on remote machines running concurrently. Start one agent refactoring module A, another writing tests for module B, and a third generating docs — all in parallel. You can monitor each agent's status and take over any time. This is ideal for large tasks that can be decomposed into independent subtasks. Think of it as parallelizing your own workforce.",
+    "category": "cursor"
+  },
+  {
+    "title": "Use Subagents for Complex Multi-Step Tasks",
+    "description": "As of Cursor 2.4 (Jan 2026), a parent agent can spawn specialized subagents — each with its own context, prompt, tool access, and even model. For example, the parent plans the task, then spawns a code-searcher subagent to find relevant files and a shell-worker subagent to run tests, all in parallel. The parent stays focused on orchestration while subagents handle subtasks. This dramatically speeds up multi-step workflows.",
+    "category": "cursor"
+  },
+  {
+    "title": "Scope Context Aggressively with @file, @folder, @docs",
+    "description": "Don't dump your whole codebase into context. Use @file to point at the exact files the agent needs, @folder for directory-level context, and @docs for external documentation. A model with 3 relevant files outperforms one with 30 loosely related files. Cursor also supports MCP (Model Context Protocol) resources for feeding structured schemas or API specs directly into the model. Less noise means better output.",
+    "category": "productivity"
+  },
+  {
+    "title": "Use /summarize to Manage Long Conversations",
+    "description": "Cursor's /summarize command (added in v1.6) compresses long chat histories into a summary snippet, freeing up context window space. Use it when a conversation gets long and the agent starts losing track of earlier decisions. Cursor also auto-triggers summarization when conversations get too long. This replaces the old Notepads feature, which was deprecated in late 2025 in favor of Rules, Commands, Skills, and Memories.",
+    "category": "cursor"
+  },
+  {
+    "title": "Use Checkpoints as Transaction Boundaries",
+    "description": "Cursor auto-saves a checkpoint after every agent run. Treat agent runs like database transactions: they either succeed fully or you revert to the checkpoint. Checkpoints persist across reloads now, so you won't lose them. Before any risky agent task, confirm you're at a clean state. If the agent goes sideways, roll back instantly instead of trying to manually undo 15 file changes.",
+    "category": "cursor"
+  },
+  {
+    "title": "Decompose Before You Prompt",
+    "description": "The single biggest mistake is giving the agent a vague, large task. 'Build me a dashboard' produces garbage. 'Create a SchedulerDashboard component that takes an array of ScheduleItem and renders a table with columns for name, status, and next run time, using our existing Table component from @file components/Table' produces something usable. Your job is to decompose. The agent's job is to execute. Use a thinking model for decomposition if the task is complex.",
+    "category": "ai-general"
+  },
+  {
+    "title": "Feed Errors Back Verbatim, Don't Paraphrase",
+    "description": "When something fails, copy the full stack trace or terminal output and paste it into the chat. Models are extremely good at diagnosing errors from raw output and extremely bad at diagnosing your summary. Cursor's agent can now read terminal exit codes and linter errors automatically, so with YOLO mode it will often self-correct. But when it doesn't, give it the raw error — not 'it broke' or 'the API call failed'.",
+    "category": "ai-general"
+  },
+  {
+    "title": "End Every Agent Run with a Summary Prompt",
+    "description": "After the agent finishes a task, ask: 'Summarize what you changed, what you didn't finish, and what might break.' This forces a self-review, surfaces incomplete work, and gives you a changelog for your PR description. It also catches cases where the agent silently skipped a step. If you wrote a PLAN.md, ask it to update the plan with completed and remaining items.",
+    "category": "productivity"
+  },
+  {
+    "title": "Pick the Right Model for the Job",
+    "description": "As of early 2026: claude-opus-4.6-max and gpt-5.3-codex-xhigh are the heavyweights for planning and complex multi-file refactors. Haiku 4.5 is your cheap workhorse for quick edits and autocomplete.",
+    "category": "ai-general"
+  },
+  {
+    "title": "Use Custom Slash Commands for Team Workflows",
+    "description": "Create reusable prompt templates in .cursor/commands/*.md and invoke them with /commandName. For example, /review could trigger a code review prompt with your team's checklist, /test could scaffold tests following your conventions, /deploy could generate a deployment checklist. These are version-controlled and shared with your team. Think of them as team-wide macros for the AI agent.",
+    "category": "cursor"
+  }
+]

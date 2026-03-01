@@ -23,8 +23,10 @@ export const getIncludedRequestSeverity = (
 
   return calculateSeverity(
     percent,
-    config.alerts.includedRequestUsage.warningPercentageThresholds,
-    config.alerts.includedRequestUsage.criticalPercentageThresholds,
+    config.alerts.usageThreshold.includedRequestUsage
+      .warningPercentageThresholds,
+    config.alerts.usageThreshold.includedRequestUsage
+      .criticalPercentageThresholds,
   );
 };
 
@@ -45,8 +47,8 @@ export const getOnDemandSeverity = (
 
   return calculateSeverity(
     percent,
-    config.alerts.onDemandUsage.warningPercentageThresholds,
-    config.alerts.onDemandUsage.criticalPercentageThresholds,
+    config.alerts.usageThreshold.onDemandUsage.warningPercentageThresholds,
+    config.alerts.usageThreshold.onDemandUsage.criticalPercentageThresholds,
   );
 };
 

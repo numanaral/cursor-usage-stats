@@ -15,7 +15,7 @@ import {
   isSqliteAvailable,
   type SqlitePromptSignal,
 } from "../../../src/sqlite";
-import { sleep, UI_PAUSE_MS } from "../../utils";
+import { IS_SLOW_MODE, sleep, UI_PAUSE_MS } from "../../utils";
 
 /**
  * Polls globalThis for the prompt signal set by the bundled extension.
@@ -251,6 +251,11 @@ suite("Sqlite UI - Post-install recovery", () => {
       subscriptions: disposables,
       extension: { packageJSON: { version: "test" } },
       globalStorageUri: { fsPath: "/tmp" },
+      globalState: {
+        get: () => undefined,
+        update: async () => {},
+        keys: () => [],
+      },
     } as unknown as vscode.ExtensionContext;
 
     activate(mockContext);
@@ -267,6 +272,8 @@ suite("Sqlite UI - Post-install recovery", () => {
     );
 
     // Give extra time to see the status bar and notification in the UI.
-    await sleep(UI_PAUSE_MS * 3);
+    if (IS_SLOW_MODE) {
+      await sleep(UI_PAUSE_MS);
+    }
   });
 });

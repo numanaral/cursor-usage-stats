@@ -19,6 +19,35 @@
       }
     },
     {
+      "name": "Run Extension (Mock + Alerts)",
+      "type": "extensionHost",
+      "request": "launch",
+      "args": ["--extensionDevelopmentPath=${workspaceFolder}"],
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+      "env": {
+        "USE_MOCKED_API_DATA": "true",
+        "CURSOR_USAGE_STATS_POLL_INTERVAL": "3",
+        "CURSOR_USAGE_STATS_MAX_MODE_POLL_INTERVAL": "5",
+        "CURSOR_USAGE_STATS_SPENDING_POLL_INTERVAL": "5"
+      }
+    },
+    {
+      "name": "Run Extension (Demo)",
+      "type": "extensionHost",
+      "request": "launch",
+      "args": [
+        "--extensionDevelopmentPath=${workspaceFolder}",
+        "${workspaceFolder}"
+      ],
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+      "env": {
+        "USE_MOCKED_API_DATA": "true",
+        "CURSOR_USAGE_STATS_POLL_INTERVAL": "3",
+        "CURSOR_USAGE_STATS_MAX_MODE_POLL_INTERVAL": "5",
+        "CURSOR_USAGE_STATS_SPENDING_POLL_INTERVAL": "5"
+      }
+    },
+    {
       "name": "Run Extension (Missing sqlite3)",
       "type": "extensionHost",
       "request": "launch",

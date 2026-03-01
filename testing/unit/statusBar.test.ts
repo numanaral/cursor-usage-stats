@@ -1,5 +1,6 @@
 import * as assert from "assert";
 
+import { EXTENSION_DEFAULT_CONFIG } from "../../src/constants";
 import {
   getIncludedRequestSeverity,
   getOnDemandSeverity,
@@ -16,25 +17,12 @@ suite("StatusBar Utils", () => {
     overrides: Partial<ExtensionConfig> = {},
   ): ExtensionConfig => {
     return {
-      notifyOnStartup: true,
-      pollIntervalSeconds: 60,
-      statusBar: {
-        displayMode: "both",
-        primaryMetric: "onDemand",
-      },
+      showWelcomeMessage: true,
       api: {
         includedRequestModelKey: "gpt-4",
       },
-      alerts: {
-        includedRequestUsage: {
-          warningPercentageThresholds: [50, 60, 70],
-          criticalPercentageThresholds: [80, 90, 95],
-        },
-        onDemandUsage: {
-          warningPercentageThresholds: [50, 60, 70],
-          criticalPercentageThresholds: [80, 90, 95],
-        },
-      },
+      alerts: EXTENSION_DEFAULT_CONFIG.alerts,
+      tips: EXTENSION_DEFAULT_CONFIG.tips,
       ...overrides,
     };
   };

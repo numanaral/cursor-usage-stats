@@ -11,6 +11,7 @@ coverage/
 # Development configs
 tsconfig.json
 eslint.config.mjs
+prettier.config.mjs
 .prettierrc
 .prettierignore
 .vscode-test.*
@@ -22,8 +23,12 @@ eslint.config.mjs
 development/**
 testing/**
 scripts/**
+agentic-rules/**
 assets/**
 !assets/logo.png
+
+# CI/CD
+.github/**
 
 # Dependencies (vsce handles this, but explicit)
 node_modules/
@@ -33,6 +38,7 @@ node_modules/
 .gitignore
 
 # Documentation (dev only)
+AGENTS.md
 plan.md
 vsc-extension-quickstart.md
 *.md

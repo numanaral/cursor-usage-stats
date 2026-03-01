@@ -1,21 +1,32 @@
 import { defineConfig } from "@vscode/test-cli";
 
-const env = {
+const ENV_VARS = {
   USE_MOCKED_API_DATA: "true",
   TEST_UI_PAUSE_MS: process.env.TEST_UI_PAUSE_MS || "0",
 };
 
-export default defineConfig([
-  {
-    label: "Integration Tests",
-    files: "out/testing/integration/main/**/*.test.js",
-    mocha: { ui: "tdd", timeout: 20000 },
-    env,
-  },
-  {
-    label: "Integration Tests (sqlite)",
-    files: "out/testing/integration/sqlite/**/*.test.js",
-    mocha: { ui: "tdd", timeout: 20000 },
-    env,
-  },
-]);
+const MOCHA_CONFIG = {
+  ui: "tdd",
+  timeout: 20000,
+};
+
+const SUITES = [
+  "sqlite",
+  "welcomeMessage",
+  "usageThreshold",
+  "maxModeDetection",
+  "spendingGuard",
+  "wizard",
+  "tips",
+];
+
+const generateTestConfig = (featureName) => {
+  return {
+    label: `Integration Tests (${featureName})`,
+    files: `out/testing/integration/${featureName}/**/*.test.js`,
+    mocha: MOCHA_CONFIG,
+    env: ENV_VARS,
+  };
+};
+
+export default defineConfig(SUITES.map(generateTestConfig));

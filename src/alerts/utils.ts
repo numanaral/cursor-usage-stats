@@ -4,6 +4,7 @@ import {
   type CursorCombinedUsage,
   type ExtensionConfig,
 } from "../types";
+import { type CursorUsageEvent } from "./types";
 
 /** Tracks which thresholds have already triggered alerts for included requests. */
 const triggeredIncludedRequestThresholds = new Set<number>();
@@ -48,7 +49,7 @@ export const markExceededThresholdsAsTriggered = (
     const percent = (modelUsage.numRequests / modelUsage.maxRequestUsage) * 100;
     markExceededThresholds(
       percent,
-      config.alerts.includedRequestUsage,
+      config.alerts.usageThreshold.includedRequestUsage,
       triggeredIncludedRequestThresholds,
     );
   }
@@ -59,7 +60,7 @@ export const markExceededThresholdsAsTriggered = (
     const percent = (onDemand.used / onDemand.limit) * 100;
     markExceededThresholds(
       percent,
-      config.alerts.onDemandUsage,
+      config.alerts.usageThreshold.onDemandUsage,
       triggeredOnDemandThresholds,
     );
   }
@@ -84,3 +85,44 @@ export const getTriggeredIncludedRequestThresholds = () => {
  * Gets the triggered on-demand thresholds (for testing).
  */
 export const getTriggeredOnDemandThresholds = () => triggeredOnDemandThresholds;
+
+// ── Event utility functions ─────────────────────────────────────────
+
+/**
+ * Filters events that have MAX mode enabled.
+ *
+ * @example
+ * ```ts
+ * getMaxModeEvents(events) // events where maxMode === true
+ * ```
+ */
+export const getMaxModeEvents = (events: CursorUsageEvent[]) => {
+  return events.filter((e) => e.maxMode === true);
+};
+
+/**
+ * Sums totalCents across all events.
+ *
+ * @example
+ * ```ts
+ * sumCostsCents([{ tokenUsage: { totalCents: 100 } }]) // 100
+ * ```
+ */
+export const sumCostsCents = (events: CursorUsageEvent[]) => {
+  return events.reduce((sum, e) => sum + e.tokenUsage.totalCents, 0);
+};
+
+/**
+ * Formats cents as a dollar amount.
+ *
+ * @example
+ * ```ts
+ * formatCostDollars(500) // "$5.00"
+ * formatCostDollars(42)  // "$0.42"
+ * ```
+ */
+export const formatCostDollars = (cents: number) => {
+  const dollars = cents / 100;
+
+  return `$${dollars.toFixed(2)}`;
+};
