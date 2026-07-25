@@ -172,7 +172,7 @@ suite("Alerts", () => {
       assert.strictEqual(onDemandTriggered.size, 0);
     });
 
-    test("handles unlimited requests (null maxRequestUsage)", () => {
+    test("handles unavailable request limit data", () => {
       const data: CursorCombinedUsage = {
         usage: createMockUsage(100, null),
         summary: createMockUsageSummary(0, 1000),

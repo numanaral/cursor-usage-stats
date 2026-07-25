@@ -3,6 +3,24 @@ export interface CursorAuthCredentials {
   accessToken: string;
 }
 
+export interface CursorUsageSummaryMetric {
+  enabled: boolean;
+  used: number;
+  limit: number;
+  remaining: number;
+}
+
+export interface CursorUsageSummaryPlan extends CursorUsageSummaryMetric {
+  breakdown: {
+    included: number;
+    bonus: number;
+    total: number;
+  };
+  autoPercentUsed: number;
+  apiPercentUsed: number;
+  totalPercentUsed: number;
+}
+
 export interface CursorUsageSummaryApiResponse {
   billingCycleStart: string;
   billingCycleEnd: string;
@@ -12,26 +30,9 @@ export interface CursorUsageSummaryApiResponse {
   autoModelSelectedDisplayMessage: string;
   namedModelSelectedDisplayMessage: string;
   individualUsage: {
-    plan: {
-      enabled: boolean;
-      used: number;
-      limit: number;
-      remaining: number;
-      breakdown: {
-        included: number;
-        bonus: number;
-        total: number;
-      };
-      autoPercentUsed: number;
-      apiPercentUsed: number;
-      totalPercentUsed: number;
-    };
-    onDemand: {
-      enabled: boolean;
-      used: number;
-      limit: number;
-      remaining: number;
-    };
+    plan?: CursorUsageSummaryPlan;
+    onDemand: CursorUsageSummaryMetric;
+    overall?: CursorUsageSummaryMetric;
   };
   teamUsage: {
     onDemand: {

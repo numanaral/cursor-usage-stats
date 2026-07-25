@@ -7,10 +7,56 @@ import {
   formatResetDateFull,
   formatResetDateShort,
   isModelUsage,
+  retryTransientFetch,
   validateThresholds,
 } from "../../src/utils";
 
 suite("Utils", () => {
+  suite("retryTransientFetch", () => {
+    test("retries a transient fetch failure", async () => {
+      let attempts = 0;
+
+      const result = await retryTransientFetch(async () => {
+        attempts += 1;
+
+        if (attempts === 1) {
+          throw new TypeError("fetch failed");
+        }
+
+        return "success";
+      }, [0]);
+
+      assert.strictEqual(result, "success");
+      assert.strictEqual(attempts, 2);
+    });
+
+    test("does not retry non-transient errors", async () => {
+      let attempts = 0;
+
+      await assert.rejects(async () => {
+        await retryTransientFetch(async () => {
+          attempts += 1;
+          throw new Error("invalid response");
+        }, [0, 0]);
+      }, /invalid response/);
+
+      assert.strictEqual(attempts, 1);
+    });
+
+    test("throws after exhausting retries", async () => {
+      let attempts = 0;
+
+      await assert.rejects(async () => {
+        await retryTransientFetch(async () => {
+          attempts += 1;
+          throw new TypeError("fetch failed");
+        }, [0, 0]);
+      }, /fetch failed/);
+
+      assert.strictEqual(attempts, 3);
+    });
+  });
+
   suite("formatCents", () => {
     test("formats 0 as $0.00", () => {
       assert.strictEqual(formatCents(0), "$0.00");

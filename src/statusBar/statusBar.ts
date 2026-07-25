@@ -144,6 +144,8 @@ export const setStatusBarLoading = () => {
   // Keep values visible, just swap icon to subtle spinner.
   const displayText = lastDisplayText || "Cursor Usage Stats";
   statusBarItem.text = `$(sync~spin) ${displayText}`;
+  statusBarItem.tooltip = "Loading usage...";
+  statusBarItem.backgroundColor = undefined;
 };
 
 /**

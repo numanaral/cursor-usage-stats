@@ -129,11 +129,13 @@ yarn install
 ### Build & Run
 
 ```bash
-yarn build          # Build the extension
-yarn watch          # Build and watch for changes
+yarn build           # Build the extension
+yarn watch           # Build and watch for changes
+yarn install:cursor  # Build, package, and install into Cursor
 ```
 
 Press `F5` in Cursor to launch the Extension Development Host.
+Reload Cursor after `yarn install:cursor` to activate the local build.
 
 ### Testing
 

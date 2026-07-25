@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.2] - 2026-07-24
+
+### Added
+
+- `yarn install:cursor` command for building, packaging, and installing a local extension build.
+
+### Fixed
+
+- Usage loading after Cursor changed `/api/usage-summary` from `individualUsage.onDemand` to `individualUsage.overall`.
+- Missing request-limit data being incorrectly displayed as unlimited usage.
+- Transient startup network failures immediately showing an error instead of retrying with a loading spinner.
+
 ## [1.1.1] - 2026-02-05
 
 ### Added

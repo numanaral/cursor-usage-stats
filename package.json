@@ -41,6 +41,7 @@
     "prewatch": "yarn mock generate",
     "watch": "yarn build --watch",
     "package": "yarn build && vsce package",
+    "install:cursor": "yarn package && tsx scripts/installExtension.ts",
     "typecheck": "tsc --noEmit",
     "eslint": "eslint .",
     "eslint:fix": "eslint . --fix",
