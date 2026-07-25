@@ -26,7 +26,7 @@ import {
   type ExtensionStatusBarPrimaryMetric,
   type ExtensionAlertThresholds,
 } from "./types";
-import { validateThresholds } from "./utils";
+import { retryTransientFetch, validateThresholds } from "./utils";
 
 let pollInterval: NodeJS.Timeout | null = null;
 let lastBillingCycleEnd: string | null = null;
@@ -154,7 +154,7 @@ export const refreshUsage = async () => {
   setStatusBarLoading();
 
   try {
-    const data = await fetchCombinedUsage();
+    const data = await retryTransientFetch(fetchCombinedUsage);
 
     // Reset thresholds on new billing cycle.
     if (
@@ -199,7 +199,7 @@ export const showDetails = async () => {
   const config = getConfig();
 
   try {
-    const data = await fetchCombinedUsage();
+    const data = await retryTransientFetch(fetchCombinedUsage);
 
     showUsageSummaryNotification(data, config, async () => {
       await refreshAndResetPoll();

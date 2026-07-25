@@ -29,6 +29,19 @@ export const getIncludedRequestSeverity = (
 };
 
 /**
+ * Formats request usage when the API provides a request limit.
+ */
+export const formatRequestUsage = (
+  modelUsage: CursorUsageDetailsForModel | null,
+): string | null => {
+  if (!modelUsage || modelUsage.maxRequestUsage === null) {
+    return null;
+  }
+
+  return `Requests: ${modelUsage.numRequests} / ${modelUsage.maxRequestUsage}`;
+};
+
+/**
  * Gets the current severity for on-demand usage.
  */
 export const getOnDemandSeverity = (
@@ -67,14 +80,10 @@ export const buildTooltip = (
   const lines: string[] = ["Cursor Usage Stats", "───────────────"];
 
   // Request usage.
-  if (modelUsage) {
-    if (modelUsage.maxRequestUsage !== null) {
-      lines.push(
-        `Requests: ${modelUsage.numRequests} / ${modelUsage.maxRequestUsage}`,
-      );
-    } else {
-      lines.push(`Requests: ${modelUsage.numRequests} (unlimited)`);
-    }
+  const requestUsage = formatRequestUsage(modelUsage);
+
+  if (requestUsage) {
+    lines.push(requestUsage);
   }
 
   // On-demand usage.

@@ -4,6 +4,41 @@ import {
   type ExtensionThresholdSeverity,
 } from "./types";
 
+const TRANSIENT_FETCH_RETRY_DELAYS_MS = [1000, 2000, 5000] as const;
+
+const wait = (delayMs: number) => {
+  return new Promise<void>((resolve) => {
+    setTimeout(resolve, delayMs);
+  });
+};
+
+/**
+ * Retries fetch failures caused by transient network availability.
+ */
+export const retryTransientFetch = async <T>(
+  operation: () => Promise<T>,
+  retryDelaysMs: readonly number[] = TRANSIENT_FETCH_RETRY_DELAYS_MS,
+): Promise<T> => {
+  let attempt = 0;
+
+  while (true) {
+    try {
+      return await operation();
+    } catch (error) {
+      const retryDelayMs = retryDelaysMs[attempt];
+      const isTransientFetchFailure =
+        error instanceof TypeError && error.message === "fetch failed";
+
+      if (!isTransientFetchFailure || retryDelayMs === undefined) {
+        throw error;
+      }
+
+      attempt += 1;
+      await wait(retryDelayMs);
+    }
+  }
+};
+
 /**
  * Formats cents to dollar string.
  *

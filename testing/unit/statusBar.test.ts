@@ -1,6 +1,7 @@
 import * as assert from "assert";
 
 import {
+  formatRequestUsage,
   getIncludedRequestSeverity,
   getOnDemandSeverity,
 } from "../../src/statusBar/utils";
@@ -123,7 +124,7 @@ suite("StatusBar Utils", () => {
       assert.strictEqual(result, "normal");
     });
 
-    test("returns normal when maxRequestUsage is null (unlimited)", () => {
+    test("returns normal when request limit data is unavailable", () => {
       const modelUsage: CursorUsageDetailsForModel = {
         numRequests: 100,
         numRequestsTotal: 100,
@@ -186,6 +187,32 @@ suite("StatusBar Utils", () => {
       const config = createMockConfig();
       const result = getIncludedRequestSeverity(modelUsage, config);
       assert.strictEqual(result, "critical");
+    });
+  });
+
+  suite("formatRequestUsage", () => {
+    test("formats requests when a limit is available", () => {
+      const modelUsage: CursorUsageDetailsForModel = {
+        numRequests: 40,
+        numRequestsTotal: 40,
+        numTokens: 0,
+        maxRequestUsage: 100,
+        maxTokenUsage: null,
+      };
+
+      assert.strictEqual(formatRequestUsage(modelUsage), "Requests: 40 / 100");
+    });
+
+    test("omits requests when the API does not provide a limit", () => {
+      const modelUsage: CursorUsageDetailsForModel = {
+        numRequests: 0,
+        numRequestsTotal: 0,
+        numTokens: 0,
+        maxRequestUsage: null,
+        maxTokenUsage: null,
+      };
+
+      assert.strictEqual(formatRequestUsage(modelUsage), null);
     });
   });
 

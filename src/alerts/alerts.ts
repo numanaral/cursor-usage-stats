@@ -2,7 +2,11 @@ import * as vscode from "vscode";
 
 import { getModelUsage } from "../api";
 import { StatusBarPrimaryMetric, ThresholdSeverity } from "../constants";
-import { getIncludedRequestSeverity, getOnDemandSeverity } from "../statusBar";
+import {
+  formatRequestUsage,
+  getIncludedRequestSeverity,
+  getOnDemandSeverity,
+} from "../statusBar";
 import {
   type ExtensionAlertThresholds,
   type CursorCombinedUsage,
@@ -204,14 +208,10 @@ export const showUsageSummaryNotification = (
 
   const parts: string[] = [];
 
-  if (modelUsage) {
-    if (modelUsage.maxRequestUsage !== null) {
-      parts.push(
-        `Requests: ${modelUsage.numRequests} / ${modelUsage.maxRequestUsage}`,
-      );
-    } else {
-      parts.push(`Requests: ${modelUsage.numRequests} (unlimited)`);
-    }
+  const requestUsage = formatRequestUsage(modelUsage);
+
+  if (requestUsage) {
+    parts.push(requestUsage);
   }
 
   if (onDemand.enabled) {

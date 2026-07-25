@@ -10,8 +10,28 @@ import {
   type CursorUsageApiResponse,
   type CursorUsageDetailsForModel,
   type CursorUsageSummaryApiResponse,
+  type CursorUsageSummaryMetric,
 } from "./types";
 import { isModelUsage } from "./utils";
+
+const isRecord = (value: unknown): value is Record<string, unknown> => {
+  return value !== null && typeof value === "object";
+};
+
+const isUsageSummaryMetric = (
+  value: unknown,
+): value is CursorUsageSummaryMetric => {
+  if (!isRecord(value)) {
+    return false;
+  }
+
+  return (
+    typeof value.enabled === "boolean" &&
+    typeof value.used === "number" &&
+    typeof value.limit === "number" &&
+    typeof value.remaining === "number"
+  );
+};
 
 /**
  * Fetches from a Cursor API endpoint with authentication.
@@ -90,17 +110,50 @@ export const fetchUsage = (): Promise<CursorUsageApiResponse> => {
 };
 
 /**
- * Fetches usage summary (billing, on-demand) from the Cursor API.
+ * Normalizes legacy and current Cursor usage summary response shapes.
  */
-export const fetchUsageSummary = (): Promise<CursorUsageSummaryApiResponse> => {
-  if (isMockingEnabled()) {
-    return Promise.resolve(getMockUsageSummary());
+export const normalizeUsageSummary = (
+  summary: unknown,
+): CursorUsageSummaryApiResponse => {
+  if (!isRecord(summary) || !isRecord(summary.individualUsage)) {
+    throw new Error("Cursor usage summary is missing individual usage data.");
   }
 
-  return fetchWithAuth<CursorUsageSummaryApiResponse>(
-    CURSOR_API_URLS.USAGE_SUMMARY,
-  );
+  const individualUsage = summary.individualUsage;
+  const onDemand = isUsageSummaryMetric(individualUsage.onDemand)
+    ? individualUsage.onDemand
+    : individualUsage.overall;
+
+  if (!isUsageSummaryMetric(onDemand)) {
+    throw new Error(
+      "Cursor usage summary has an unsupported individual usage format.",
+    );
+  }
+
+  return {
+    ...summary,
+    individualUsage: {
+      ...individualUsage,
+      onDemand,
+    },
+  } as unknown as CursorUsageSummaryApiResponse;
 };
+
+/**
+ * Fetches usage summary (billing, on-demand) from the Cursor API.
+ */
+export const fetchUsageSummary =
+  async (): Promise<CursorUsageSummaryApiResponse> => {
+    let summary: unknown;
+
+    if (isMockingEnabled()) {
+      summary = getMockUsageSummary();
+    } else {
+      summary = await fetchWithAuth<unknown>(CURSOR_API_URLS.USAGE_SUMMARY);
+    }
+
+    return normalizeUsageSummary(summary);
+  };
 
 /**
  * Fetches both usage and summary data.

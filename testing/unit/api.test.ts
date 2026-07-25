@@ -1,6 +1,10 @@
 import * as assert from "assert";
 
-import { findModelKey, getModelUsage } from "../../src/api";
+import {
+  findModelKey,
+  getModelUsage,
+  normalizeUsageSummary,
+} from "../../src/api";
 import {
   type CursorUsageDetailsForModel,
   type CursorUsageApiResponse,
@@ -27,6 +31,49 @@ suite("API", () => {
 
     return usage;
   };
+
+  suite("normalizeUsageSummary", () => {
+    const legacyMetric = {
+      enabled: true,
+      used: 250,
+      limit: 1000,
+      remaining: 750,
+    };
+    const overallMetric = {
+      enabled: true,
+      used: 400,
+      limit: 2000,
+      remaining: 1600,
+    };
+
+    test("preserves the legacy on-demand metric", () => {
+      const result = normalizeUsageSummary({
+        individualUsage: {
+          onDemand: legacyMetric,
+          overall: overallMetric,
+        },
+      });
+
+      assert.deepStrictEqual(result.individualUsage.onDemand, legacyMetric);
+    });
+
+    test("maps the current overall metric to on-demand usage", () => {
+      const result = normalizeUsageSummary({
+        individualUsage: {
+          overall: overallMetric,
+        },
+      });
+
+      assert.deepStrictEqual(result.individualUsage.onDemand, overallMetric);
+      assert.deepStrictEqual(result.individualUsage.overall, overallMetric);
+    });
+
+    test("rejects unsupported individual usage data", () => {
+      assert.throws(() => {
+        normalizeUsageSummary({ individualUsage: {} });
+      }, /unsupported individual usage format/);
+    });
+  });
 
   suite("findModelKey", () => {
     test("returns preferred key when it exists and is valid", () => {
@@ -78,7 +125,7 @@ suite("API", () => {
       assert.strictEqual(result, "claude-3");
     });
 
-    test("handles usage with null maxRequestUsage (unlimited)", () => {
+    test("handles usage with unavailable request limit data", () => {
       const usage = createMockUsage({
         "gpt-4": { numRequestsTotal: 100, maxRequestUsage: null },
       });
@@ -130,7 +177,7 @@ suite("API", () => {
       assert.strictEqual(result.numRequests, 25);
     });
 
-    test("handles unlimited model usage (null maxRequestUsage)", () => {
+    test("returns model usage with an unavailable request limit", () => {
       const usage = createMockUsage({
         "gpt-4": {
           numRequests: 100,
